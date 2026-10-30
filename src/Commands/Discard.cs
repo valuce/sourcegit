@@ -51,6 +51,18 @@ namespace SourceGit.Commands
         }
 
         /// <summary>
+        ///     Discard all local changes inside a submodule (untracked files included), then checkout the revision
+        ///     recorded by the repository if the HEAD of the submodule has moved.
+        /// </summary>
+        public static async Task SubmoduleAsync(string repo, string submodule, Models.ICommandLog log)
+        {
+            var fullPath = $"{repo}/{submodule}";
+            await new Reset(fullPath, "", "--hard").Use(log).ExecAsync().ConfigureAwait(false);
+            await new Clean(fullPath, Models.CleanMode.OnlyUntrackedFiles).Use(log).ExecAsync().ConfigureAwait(false);
+            await new Submodule(repo).Use(log).CheckoutRecordedRevisionAsync(submodule).ConfigureAwait(false);
+        }
+
+        /// <summary>
         ///     Discard selected changes (only unstaged).
         /// </summary>
         /// <param name="repo"></param>

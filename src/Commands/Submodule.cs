@@ -65,6 +65,13 @@ namespace SourceGit.Commands
             return await ExecAsync().ConfigureAwait(false);
         }
 
+        public async Task<bool> CheckoutRecordedRevisionAsync(string module)
+        {
+            // `--checkout` ignores the `submodule.<name>.update` setting, which could rebase or merge instead.
+            Args = $"submodule update --checkout -- {module.Quoted()}";
+            return await ExecAsync().ConfigureAwait(false);
+        }
+
         public async Task<bool> DeinitAsync(string module, bool force)
         {
             Args = force ? $"submodule deinit -f -- {module.Quoted()}" : $"submodule deinit -- {module.Quoted()}";

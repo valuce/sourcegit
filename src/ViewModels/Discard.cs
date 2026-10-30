@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SourceGit.ViewModels
@@ -84,7 +85,25 @@ namespace SourceGit.ViewModels
             }
             else
             {
-                await Commands.Discard.ChangesAsync(_repo.FullPath, _changes, log);
+                // Discarding a submodule returns it to the revision recorded by this repository, without local changes.
+                var changes = new List<Models.Change>();
+                var submodules = new List<string>();
+                foreach (var c in _changes)
+                {
+                    if (_repo.Submodules.Find(x => x.Path.Equals(c.Path, StringComparison.Ordinal)) != null)
+                        submodules.Add(c.Path);
+                    else
+                        changes.Add(c);
+                }
+
+                if (changes.Count > 0)
+                    await Commands.Discard.ChangesAsync(_repo.FullPath, changes, log);
+
+                foreach (var submodule in submodules)
+                    await Commands.Discard.SubmoduleAsync(_repo.FullPath, submodule, log);
+
+                if (submodules.Count > 0)
+                    _repo.RefreshSubmodules();
             }
 
             log.Complete();
