@@ -54,12 +54,23 @@ namespace SourceGit.Commands
         ///     Discard all local changes inside a submodule (untracked files included), then checkout the revision
         ///     recorded by the repository if the HEAD of the submodule has moved.
         /// </summary>
-        public static async Task SubmoduleAsync(string repo, string submodule, Models.ICommandLog log)
+        public static Task SubmoduleAsync(string repo, string submodule, Models.ICommandLog log)
         {
-            var fullPath = $"{repo}/{submodule}";
-            await new Reset(fullPath, "", "--hard").Use(log).ExecAsync().ConfigureAwait(false);
-            await new Clean(fullPath, Models.CleanMode.OnlyUntrackedFiles).Use(log).ExecAsync().ConfigureAwait(false);
-            await new Submodule(repo).Use(log).CheckoutRecordedRevisionAsync(submodule).ConfigureAwait(false);
+            return SubmoduleAsync(repo, submodule, true, true, false, log);
+        }
+
+        /// <summary>
+        ///     Discard local changes inside every submodule that has them or whose HEAD differs from the recorded revision.
+        ///     Call it after `AllAsync`, because `git reset --hard` resets the recorded revisions but not the submodules.
+        /// </summary>
+        public static async Task AllSubmodulesAsync(string repo, bool includeModified, bool includeUntracked, bool includeIgnored, Models.ICommandLog log)
+        {
+            var submodules = await new QuerySubmodules(repo).GetResultAsync().ConfigureAwait(false);
+            foreach (var submodule in submodules)
+            {
+                if (submodule.Status == Models.SubmoduleStatus.Modified || submodule.Status == Models.SubmoduleStatus.RevisionChanged)
+                    await SubmoduleAsync(repo, submodule.Path, includeModified, includeUntracked, includeIgnored, log).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -102,6 +113,21 @@ namespace SourceGit.Commands
                 await new Restore(repo, pathSpecFile).Use(log).ExecAsync().ConfigureAwait(false);
                 File.Delete(pathSpecFile);
             }
+        }
+
+        private static async Task SubmoduleAsync(string repo, string submodule, bool includeModified, bool includeUntracked, bool includeIgnored, Models.ICommandLog log)
+        {
+            var fullPath = $"{repo}/{submodule}";
+            if (includeModified)
+                await new Reset(fullPath, "", "--hard").Use(log).ExecAsync().ConfigureAwait(false);
+
+            if (includeUntracked)
+                await new Clean(fullPath, includeIgnored ? Models.CleanMode.UntrackedAndIgnoredFiles : Models.CleanMode.OnlyUntrackedFiles).Use(log).ExecAsync().ConfigureAwait(false);
+            else if (includeIgnored)
+                await new Clean(fullPath, Models.CleanMode.OnlyIgnoredFiles).Use(log).ExecAsync().ConfigureAwait(false);
+
+            if (includeModified)
+                await new Submodule(repo).Use(log).CheckoutRecordedRevisionAsync(submodule).ConfigureAwait(false);
         }
     }
 }
