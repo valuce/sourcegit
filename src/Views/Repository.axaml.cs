@@ -2,8 +2,10 @@ using System;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace SourceGit.Views
@@ -80,6 +82,18 @@ namespace SourceGit.Views
         {
             _sidebarWidth = new GridLength(ViewModels.Preferences.Instance.Layout.RepositorySidebarWidth);
             InitializeComponent();
+
+            _leftSidebarGroups =
+            [
+                (LocalBranchGroupHeader, LocalBranchTree),
+                (RemoteGroupHeader, RemoteBranchTree),
+                (TagGroupHeader, TagsList),
+                (SubmoduleGroupHeader, SubmoduleList),
+                (WorktreeGroupHeader, WorktreeList),
+            ];
+
+            LeftSidebarGroups.AddHandler(RequestBringIntoViewEvent, OnLeftSidebarRequestBringIntoView);
+            LeftSidebarGroups.AddHandler(KeyDownEvent, OnLeftSidebarKeyDown, RoutingStrategies.Tunnel);
         }
 
         protected override void OnLoaded(RoutedEventArgs e)
@@ -236,132 +250,72 @@ namespace SourceGit.Views
             e.Handled = true;
         }
 
-        private void OnLeftSidebarSizeChanged(object _, SizeChangedEventArgs e)
-        {
-            if (e.HeightChanged)
-                UpdateLeftSidebarLayout();
-        }
-
         private void UpdateLeftSidebarLayout()
         {
-            if (!IsLoaded || _isCommitSearchPanelVisible)
+            if (DataContext is not ViewModels.Repository vm)
                 return;
 
-            if (DataContext is not ViewModels.Repository { UIStates: { } } vm)
+            // All groups share the same scroll viewer, so every list is simply as tall as all of its rows.
+            LocalBranchTree.Height = LocalBranchTree.Rows.Count * 24.0;
+            RemoteBranchTree.Height = RemoteBranchTree.Rows.Count * 24.0;
+            TagsList.Height = TagsList.Rows * 24.0;
+            SubmoduleList.Height = SubmoduleList.Rows * 24.0;
+            WorktreeList.Height = vm.Worktrees.Count * 24.0;
+        }
+
+        private void OnLeftSidebarLayoutUpdated(object _1, EventArgs _2)
+        {
+            // Pin the header of the group at the top of the viewport, until the next group's header pushes it away.
+            // NOTE: use the real (pixel-snapped) position of the scrolled content rather than the raw scroll offset,
+            //       otherwise pinned headers can be off by a fraction of a pixel and let the rows below show through.
+            var offset = -LeftSidebarGroups.Bounds.Top;
+            foreach (var (header, content) in _leftSidebarGroups)
+            {
+                var top = header.Bounds.Top;
+                var end = content.IsVisible ? content.Bounds.Bottom : header.Bounds.Bottom;
+                var shift = Math.Clamp(offset - top, 0, Math.Max(0, end - header.Bounds.Bottom));
+
+                if (header.RenderTransform is TranslateTransform translate)
+                    translate.Y = shift;
+                else
+                    header.RenderTransform = new TranslateTransform(0, shift);
+
+                header.Classes.Set("stuck", shift > 0);
+            }
+        }
+
+        private void OnLeftSidebarGroupHeaderClick(object sender, RoutedEventArgs e)
+        {
+            // Collapsing a pinned group: keep its header where it was clicked and let the next group follow right after it.
+            if (sender is ToggleButton { IsChecked: false } header && e.Source == header && header.Classes.Contains("stuck"))
+                LeftSidebarScroller.Offset = new Vector(0, header.Bounds.Top);
+        }
+
+        private void OnLeftSidebarRequestBringIntoView(object _, RequestBringIntoViewEventArgs e)
+        {
+            // Rows brought into view (keyboard navigation, locating a branch...) must not end up behind a pinned group header.
+            if (e.TargetObject is Visual target && target.FindAncestorOfType<ListBoxItem>(true) != null)
+            {
+                var rect = e.TargetRect;
+                e.TargetRect = new Rect(rect.X, rect.Y - 28.0, rect.Width, rect.Height + 28.0);
+            }
+        }
+
+        private void OnLeftSidebarKeyDown(object _, KeyEventArgs e)
+        {
+            // The lists inside can not scroll by themselves anymore, so page the whole sidebar instead.
+            if (e.Key is not (Key.PageUp or Key.PageDown) || e.KeyModifiers != KeyModifiers.None)
                 return;
 
-            var leftHeight = LeftSidebarGroups.Bounds.Height - 28.0 * 5 - 4;
-            if (leftHeight <= 0)
-                return;
+            var page = Math.Max(24.0, LeftSidebarScroller.Viewport.Height - 28.0);
+            var offset = LeftSidebarScroller.Offset;
+            LeftSidebarScroller.Offset = offset.WithY(e.Key == Key.PageUp ? offset.Y - page : offset.Y + page);
+            e.Handled = true;
+        }
 
-            var localBranchRows = vm.IsLocalBranchGroupExpanded ? LocalBranchTree.Rows.Count : 0;
-            var remoteBranchRows = vm.IsRemoteGroupExpanded ? RemoteBranchTree.Rows.Count : 0;
-            var desiredBranches = (localBranchRows + remoteBranchRows) * 24.0;
-            var desiredTag = vm.IsTagGroupExpanded ? 24.0 * TagsList.Rows : 0;
-            var desiredSubmodule = vm.IsSubmoduleGroupExpanded ? 24.0 * SubmoduleList.Rows : 0;
-            var desiredWorktree = vm.IsWorktreeGroupExpanded ? 24.0 * vm.Worktrees.Count : 0;
-            var desiredOthers = desiredTag + desiredSubmodule + desiredWorktree;
-            var hasOverflow = (desiredBranches + desiredOthers > leftHeight);
-
-            if (vm.IsWorktreeGroupExpanded)
-            {
-                var height = desiredWorktree;
-                if (hasOverflow)
-                {
-                    var test = leftHeight - desiredBranches - desiredTag - desiredSubmodule;
-                    if (test < 0)
-                        height = Math.Min(120, height);
-                    else
-                        height = Math.Max(120, test);
-                }
-
-                leftHeight -= height;
-                WorktreeList.Height = height;
-                hasOverflow = (desiredBranches + desiredTag + desiredSubmodule) > leftHeight;
-            }
-
-            if (vm.IsSubmoduleGroupExpanded)
-            {
-                var height = desiredSubmodule;
-                if (hasOverflow)
-                {
-                    var test = leftHeight - desiredBranches - desiredTag;
-                    if (test < 0)
-                        height = Math.Min(120, height);
-                    else
-                        height = Math.Max(120, test);
-                }
-
-                leftHeight -= height;
-                SubmoduleList.Height = height;
-                hasOverflow = (desiredBranches + desiredTag) > leftHeight;
-            }
-
-            if (vm.IsTagGroupExpanded)
-            {
-                var height = desiredTag;
-                if (hasOverflow)
-                {
-                    var test = leftHeight - desiredBranches;
-                    if (test < 0)
-                        height = Math.Min(120, height);
-                    else
-                        height = Math.Max(120, test);
-                }
-
-                leftHeight -= height;
-                TagsList.Height = height;
-            }
-
-            if (leftHeight > 0 && desiredBranches > leftHeight)
-            {
-                var local = localBranchRows * 24.0;
-                var remote = remoteBranchRows * 24.0;
-                var half = leftHeight / 2;
-                if (vm.IsLocalBranchGroupExpanded)
-                {
-                    if (vm.IsRemoteGroupExpanded)
-                    {
-                        if (local < half)
-                        {
-                            LocalBranchTree.Height = local;
-                            RemoteBranchTree.Height = leftHeight - local;
-                        }
-                        else if (remote < half)
-                        {
-                            RemoteBranchTree.Height = remote;
-                            LocalBranchTree.Height = leftHeight - remote;
-                        }
-                        else
-                        {
-                            LocalBranchTree.Height = half;
-                            RemoteBranchTree.Height = half;
-                        }
-                    }
-                    else
-                    {
-                        LocalBranchTree.Height = leftHeight;
-                    }
-                }
-                else if (vm.IsRemoteGroupExpanded)
-                {
-                    RemoteBranchTree.Height = leftHeight;
-                }
-            }
-            else
-            {
-                if (vm.IsLocalBranchGroupExpanded)
-                {
-                    var height = localBranchRows * 24;
-                    LocalBranchTree.Height = height;
-                }
-
-                if (vm.IsRemoteGroupExpanded)
-                {
-                    var height = remoteBranchRows * 24;
-                    RemoteBranchTree.Height = height;
-                }
-            }
+        private void OnLeftSidebarFilterTextChanged(object _1, TextChangedEventArgs _2)
+        {
+            LeftSidebarScroller.ScrollToHome();
         }
 
         private void OnOpenSortLocalBranchMenu(object sender, RoutedEventArgs e)
@@ -530,6 +484,7 @@ namespace SourceGit.Views
             }
         }
 
+        private readonly (ToggleButton Header, Control Content)[] _leftSidebarGroups;
         private bool _isNormalSidebarVisible = true;
         private bool _isCommitSearchPanelVisible = false;
         private double _sidebarMinWidth = 200;

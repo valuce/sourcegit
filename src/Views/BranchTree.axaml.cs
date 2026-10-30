@@ -346,12 +346,13 @@ namespace SourceGit.Views
                 }
             }
 
+            // Let the owner resize this tree for the new rows first, so that scrolling the target into view works.
+            if (oldRowCount != rows.Count)
+                RaiseEvent(new RoutedEventArgs(RowsChangedEvent));
+
             var target = treePath[^1];
             BranchesPresenter.SelectedItem = target;
             BranchesPresenter.ScrollIntoView(target);
-
-            if (oldRowCount != rows.Count)
-                RaiseEvent(new RoutedEventArgs(RowsChangedEvent));
         }
 
         public void UnselectAll()
