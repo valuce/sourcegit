@@ -124,6 +124,21 @@ namespace SourceGit.Commands
 
                     if (isSubmoduleChange)
                     {
+                        // A submodule that only has local changes keeps its commit, so git prints no `index` line for
+                        // it. Take the revisions from the `Subproject commit` lines instead (the new one ends with `-dirty`).
+                        if (string.IsNullOrEmpty(_result.NewHash))
+                        {
+                            for (int i = 1; i < _result.TextDiff.Lines.Count; i++)
+                            {
+                                var line = _result.TextDiff.Lines[i];
+                                var revision = line.Content.Substring(SPECIAL_SUBMODULE.Length).Trim();
+                                if (line.Type == Models.TextDiffLineType.Deleted)
+                                    _result.OldHash = revision;
+                                else if (line.Type == Models.TextDiffLineType.Added)
+                                    _result.NewHash = revision;
+                            }
+                        }
+
                         _result.IsSubmoduleChange = true;
                         _result.TextDiff = null;
                         return _result;
