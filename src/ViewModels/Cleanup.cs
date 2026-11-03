@@ -57,12 +57,16 @@ namespace SourceGit.ViewModels
             var log = _repo.CreateLog("Cleanup (GC & prune)");
             Use(log);
 
+            var totalSteps = IncludeSubmodules ? _submodules.Count + 1 : 1;
+            SetProgressStep(0, totalSteps);
             await CleanupAsync(_repo.FullPath, _repo.GitDir, log);
 
             if (IncludeSubmodules)
             {
-                foreach (var submodule in _submodules)
+                for (var i = 0; i < _submodules.Count; i++)
                 {
+                    var submodule = _submodules[i];
+                    SetProgressStep(i + 1, totalSteps);
                     log.AppendLine($"Entering '{submodule.Path}'");
                     await CleanupAsync(submodule.FullPath, submodule.GitDir, log);
                 }

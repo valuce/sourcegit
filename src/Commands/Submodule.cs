@@ -46,7 +46,7 @@ namespace SourceGit.Commands
         public async Task<bool> UpdateAsync(List<string> modules, bool init, bool recursive, bool useRemote)
         {
             var builder = new StringBuilder();
-            builder.Append("submodule update");
+            builder.Append("submodule update --progress");
 
             if (init)
                 builder.Append(" --init");

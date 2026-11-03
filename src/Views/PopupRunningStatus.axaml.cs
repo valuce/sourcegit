@@ -19,6 +19,18 @@ namespace SourceGit.Views
             set => SetAndRaise(DescriptionProperty, ref _description, value);
         }
 
+        public static readonly DirectProperty<PopupRunningStatus, double> ProgressProperty =
+            AvaloniaProperty.RegisterDirect<PopupRunningStatus, double>(
+                nameof(Progress),
+                static o => o.Progress,
+                static (o, v) => o.Progress = v);
+
+        public double Progress
+        {
+            get => _progress;
+            set => SetAndRaise(ProgressProperty, ref _progress, value);
+        }
+
         public PopupRunningStatus()
         {
             InitializeComponent();
@@ -50,12 +62,17 @@ namespace SourceGit.Views
                 else
                     StopAnim();
             }
+            else if (change.Property == ProgressProperty)
+            {
+                if (Icon.Content != null)
+                    UpdateProgressBar();
+            }
         }
 
         private void StartAnim()
         {
             Icon.Content = new Path() { Classes = { "waiting" } };
-            ProgressBar.IsIndeterminate = true;
+            UpdateProgressBar();
         }
 
         private void StopAnim()
@@ -66,7 +83,17 @@ namespace SourceGit.Views
             ProgressBar.IsIndeterminate = false;
         }
 
+        private void UpdateProgressBar()
+        {
+            // Unknown progress is shown as an indeterminate bar.
+            var isKnown = _progress >= 0;
+            ProgressBar.IsIndeterminate = !isKnown;
+            ProgressBar.Value = isKnown ? _progress : 0;
+            ProgressText.Text = isKnown ? $"{_progress:F0}%" : string.Empty;
+        }
+
         private string _description = string.Empty;
+        private double _progress = -1;
         private bool _isUnloading = false;
     }
 }

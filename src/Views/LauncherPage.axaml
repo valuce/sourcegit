@@ -134,6 +134,7 @@
                       <v:PopupRunningStatus Margin="12,8"
                                             Focusable="False"
                                             Description="{Binding ProgressDescription}"
+                                            Progress="{Binding Progress}"
                                             IsVisible="{Binding InProgress}"
                                             IsHitTestVisible="False"/>
 

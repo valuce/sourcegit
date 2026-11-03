@@ -48,6 +48,10 @@ namespace SourceGit.Commands
             proc.OutputDataReceived += (_, e) => HandleOutput(e.Data, errs);
             proc.ErrorDataReceived += (_, e) => HandleOutput(e.Data, errs);
 
+            // Git LFS only reports progress to a terminal by default, but it is shown in the popup of the running command.
+            if (Log != null)
+                proc.StartInfo.Environment["GIT_LFS_FORCE_PROGRESS"] = "1";
+
             var captured = new CapturedProcess() { Process = proc };
             var capturedLock = new object();
             try
