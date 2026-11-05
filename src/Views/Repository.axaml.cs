@@ -135,6 +135,30 @@ namespace SourceGit.Views
             e.Handled = true;
         }
 
+        private void OnShowSidebarDashboard(object _, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.Repository repo)
+                repo.Histories.IsSearchingCommits = false;
+
+            e.Handled = true;
+        }
+
+        private void OnShowSidebarCommitSearch(object _, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.Repository repo)
+                repo.Histories.IsSearchingCommits = true;
+
+            e.Handled = true;
+        }
+
+        private void OnOpenAdvancedHistoriesOptions(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && DataContext is ViewModels.Repository repo)
+                Histories.OpenAdvancedOptionsMenu(button, repo.Histories);
+
+            e.Handled = true;
+        }
+
         private void OnToggleSidebarFilter(object _, RoutedEventArgs e)
         {
             FilterBox.Focus();

@@ -58,6 +58,14 @@
                     <Binding Path="IsWorkingCopyVisible"/>
                     <Binding Source="{x:Static vm:Preferences.Instance}" Path="Layout.IsSidebarCollapsedInLocalChanges" Converter="{x:Static BoolConverters.Not}"/>
                   </MultiBinding>
+                  <!-- Classic layout: the sidebar holds the page switcher, so keep it on every page except commit search -->
+                  <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    <Binding Source="{x:Static vm:Preferences.Instance}" Path="ShowPageSwitcherInSidebar"/>
+                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                      <Binding Path="IsDashboardVisible" Converter="{x:Static BoolConverters.Not}"/>
+                      <Binding Path="Histories.IsSearchingCommits" Converter="{x:Static BoolConverters.Not}"/>
+                    </MultiBinding>
+                  </MultiBinding>
                 </MultiBinding>
               </v:Repository.IsNormalSidebarVisible>
             </v:Repository>
