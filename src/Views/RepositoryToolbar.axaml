@@ -21,6 +21,14 @@
       <Button Classes="icon_button" Width="32" Click="OpenStatistics" ToolTip.Tip="{DynamicResource Text.Repository.Statistics}">
         <Path Width="13" Height="13" Margin="0,1.5,0,0" Data="{StaticResource Icons.Statistics}"/>
       </Button>
+
+      <Button Classes="icon_button"
+              Width="32"
+              Click="OpenConfigure"
+              IsVisible="{Binding Source={x:Static vm:Preferences.Instance}, Path=ShowPageSwitcherInSidebar}"
+              ToolTip.Tip="{DynamicResource Text.Repository.Configure}">
+        <Path Width="14" Height="14" Data="{StaticResource Icons.Settings}"/>
+      </Button>
     </StackPanel>
 
     <StackPanel Grid.Column="1" Orientation="Horizontal">

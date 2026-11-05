@@ -685,6 +685,7 @@
   <x:String x:Key="Text.Preferences.Appearance.FontSize.Default" xml:space="preserve">По умолчанию</x:String>
   <x:String x:Key="Text.Preferences.Appearance.FontSize.Editor" xml:space="preserve">Редактор</x:String>
   <x:String x:Key="Text.Preferences.Appearance.MonospaceFont" xml:space="preserve">Моноширинный шрифт</x:String>
+  <x:String x:Key="Text.Preferences.Appearance.ShowPageSwitcherInSidebar" xml:space="preserve">Показывать ИСТОРИЯ / ИЗМЕНЕНИЯ / ОТЛОЖЕННЫЕ в боковой панели репозитория (классический вид)</x:String>
   <x:String x:Key="Text.Preferences.Appearance.Theme" xml:space="preserve">Тема</x:String>
   <x:String x:Key="Text.Preferences.Appearance.ThemeOverrides" xml:space="preserve">Переопределение темы</x:String>
   <x:String x:Key="Text.Preferences.Appearance.UseAutoHideScrollBars" xml:space="preserve">Автоматически скрывать прокрутку</x:String>
@@ -840,6 +841,9 @@
   <x:String x:Key="Text.Repository.OpenAsFolder" xml:space="preserve">Открыть как каталог</x:String>
   <x:String x:Key="Text.Repository.OpenIn" xml:space="preserve">Открыть в {0}</x:String>
   <x:String x:Key="Text.Repository.OpenWithExternalTools" xml:space="preserve">Открыть в расширенном инструменте</x:String>
+  <x:String x:Key="Text.Repository.PageSwitcher.Histories" xml:space="preserve">ИСТОРИЯ</x:String>
+  <x:String x:Key="Text.Repository.PageSwitcher.Stashes" xml:space="preserve">ОТЛОЖЕННЫЕ</x:String>
+  <x:String x:Key="Text.Repository.PageSwitcher.WorkingCopy" xml:space="preserve">ИЗМЕНЕНИЯ</x:String>
   <x:String x:Key="Text.Repository.Remotes" xml:space="preserve">ВНЕШНИЕ РЕПОЗИТОРИИ</x:String>
   <x:String x:Key="Text.Repository.Remotes.Add" xml:space="preserve">ДОБАВИТЬ ВНЕШНИЙ РЕПОЗИТОРИЙ</x:String>
   <x:String x:Key="Text.Repository.Resolve" xml:space="preserve">РАЗРЕШИТЬ</x:String>

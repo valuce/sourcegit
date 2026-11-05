@@ -217,6 +217,12 @@ namespace SourceGit.ViewModels
             set => SetProperty(ref _useTwoColumnsLayoutInHistories, value);
         }
 
+        public bool ShowPageSwitcherInSidebar
+        {
+            get => _showPageSwitcherInSidebar;
+            set => SetProperty(ref _showPageSwitcherInSidebar, value);
+        }
+
         public bool DisplayTimeAsPeriodInHistories
         {
             get => _displayTimeAsPeriodInHistories;
@@ -831,6 +837,7 @@ namespace SourceGit.ViewModels
 
         private bool _showTagsInGraph = true;
         private bool _useTwoColumnsLayoutInHistories = false;
+        private bool _showPageSwitcherInSidebar = false;
         private bool _displayTimeAsPeriodInHistories = false;
         private bool _useSideBySideDiff = false;
         private bool _ignoreWhitespaceChangesInDiff = false;

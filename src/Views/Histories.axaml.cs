@@ -523,14 +523,8 @@ namespace SourceGit.Views
             _resizingAuthorColumn = false;
         }
 
-        private void OnOpenAdvancedOptions(object sender, RoutedEventArgs e)
+        public static void OpenAdvancedOptionsMenu(Button button, ViewModels.Histories histories)
         {
-            if (sender is not Button button)
-                return;
-
-            if (DataContext is not ViewModels.Histories histories)
-                return;
-
             var pref = ViewModels.Preferences.Instance;
 
             var layout = new MenuItem();
@@ -541,7 +535,7 @@ namespace SourceGit.Views
             var horizontal = new MenuItem();
             horizontal.Header = App.Text("Repository.HistoriesLayout.Horizontal");
             if (isHorizontal)
-                horizontal.Icon = this.CreateMenuIcon("Icons.Check");
+                horizontal.Icon = button.CreateMenuIcon("Icons.Check");
             horizontal.Click += (_, ev) =>
             {
                 pref.UseTwoColumnsLayoutInHistories = true;
@@ -551,7 +545,7 @@ namespace SourceGit.Views
             var vertical = new MenuItem();
             vertical.Header = App.Text("Repository.HistoriesLayout.Vertical");
             if (!isHorizontal)
-                vertical.Icon = this.CreateMenuIcon("Icons.Check");
+                vertical.Icon = button.CreateMenuIcon("Icons.Check");
             vertical.Click += (_, ev) =>
             {
                 pref.UseTwoColumnsLayoutInHistories = false;
@@ -566,7 +560,7 @@ namespace SourceGit.Views
             reflog.Header = App.Text("Repository.ShowLostCommits");
             reflog.Tag = "--reflog";
             if (histories.HasShowFlag(Models.HistoryShowFlags.Reflog))
-                reflog.Icon = this.CreateMenuIcon("Icons.Check");
+                reflog.Icon = button.CreateMenuIcon("Icons.Check");
             reflog.Click += (_, ev) =>
             {
                 histories.ToggleShowFlag(Models.HistoryShowFlags.Reflog);
@@ -577,7 +571,7 @@ namespace SourceGit.Views
             firstParentOnly.Header = App.Text("Repository.ShowFirstParentOnly");
             firstParentOnly.Tag = "--first-parent";
             if (histories.HasShowFlag(Models.HistoryShowFlags.FirstParentOnly))
-                firstParentOnly.Icon = this.CreateMenuIcon("Icons.Check");
+                firstParentOnly.Icon = button.CreateMenuIcon("Icons.Check");
             firstParentOnly.Click += (_, ev) =>
             {
                 histories.ToggleShowFlag(Models.HistoryShowFlags.FirstParentOnly);
@@ -588,7 +582,7 @@ namespace SourceGit.Views
             simplifyByDecoration.Header = App.Text("Repository.ShowDecoratedCommitsOnly");
             simplifyByDecoration.Tag = "--simplify-by-decoration";
             if (histories.HasShowFlag(Models.HistoryShowFlags.SimplifyByDecoration))
-                simplifyByDecoration.Icon = this.CreateMenuIcon("Icons.Check");
+                simplifyByDecoration.Icon = button.CreateMenuIcon("Icons.Check");
             simplifyByDecoration.Click += (_, ev) =>
             {
                 histories.ToggleShowFlag(Models.HistoryShowFlags.SimplifyByDecoration);
@@ -603,7 +597,7 @@ namespace SourceGit.Views
             dateOrder.Header = App.Text("Repository.HistoriesOrder.ByDate");
             dateOrder.Tag = "--date-order";
             if (!histories.EnableTopoOrder)
-                dateOrder.Icon = this.CreateMenuIcon("Icons.Check");
+                dateOrder.Icon = button.CreateMenuIcon("Icons.Check");
             dateOrder.Click += (_, ev) =>
             {
                 histories.EnableTopoOrder = false;
@@ -614,7 +608,7 @@ namespace SourceGit.Views
             topoOrder.Header = App.Text("Repository.HistoriesOrder.Topo");
             topoOrder.Tag = "--topo-order";
             if (histories.EnableTopoOrder)
-                topoOrder.Icon = this.CreateMenuIcon("Icons.Check");
+                topoOrder.Icon = button.CreateMenuIcon("Icons.Check");
             topoOrder.Click += (_, ev) =>
             {
                 histories.EnableTopoOrder = true;
@@ -628,7 +622,7 @@ namespace SourceGit.Views
             var all = new MenuItem();
             all.Header = App.Text("Histories.HighlightsInGraph.All");
             if (histories.GraphHighlighting == Models.CommitGraphHighlighting.All)
-                all.Icon = this.CreateMenuIcon("Icons.Check");
+                all.Icon = button.CreateMenuIcon("Icons.Check");
             all.Click += (_, ev) =>
             {
                 histories.GraphHighlighting = Models.CommitGraphHighlighting.All;
@@ -638,7 +632,7 @@ namespace SourceGit.Views
             var currentBranchOnly = new MenuItem();
             currentBranchOnly.Header = App.Text("Histories.HighlightsInGraph.CurrentBranchOnly");
             if (histories.GraphHighlighting == Models.CommitGraphHighlighting.CurrentBranchOnly)
-                currentBranchOnly.Icon = this.CreateMenuIcon("Icons.Check");
+                currentBranchOnly.Icon = button.CreateMenuIcon("Icons.Check");
             currentBranchOnly.Click += (_, ev) =>
             {
                 histories.GraphHighlighting = Models.CommitGraphHighlighting.CurrentBranchOnly;
@@ -648,7 +642,7 @@ namespace SourceGit.Views
             var selectedCommitsOnly = new MenuItem();
             selectedCommitsOnly.Header = App.Text("Histories.HighlightsInGraph.SelectedCommitsOnly");
             if (histories.GraphHighlighting == Models.CommitGraphHighlighting.SelectedCommitsOnly)
-                selectedCommitsOnly.Icon = this.CreateMenuIcon("Icons.Check");
+                selectedCommitsOnly.Icon = button.CreateMenuIcon("Icons.Check");
             selectedCommitsOnly.Click += (_, ev) =>
             {
                 histories.GraphHighlighting = Models.CommitGraphHighlighting.SelectedCommitsOnly;
@@ -658,7 +652,7 @@ namespace SourceGit.Views
             var selectedCommitsOnlyFirstParent = new MenuItem();
             selectedCommitsOnlyFirstParent.Header = App.Text("Histories.HighlightsInGraph.SelectedCommitsOnlyFirstParent");
             if (histories.GraphHighlighting == Models.CommitGraphHighlighting.SelectedCommitsOnlyFirstParent)
-                selectedCommitsOnlyFirstParent.Icon = this.CreateMenuIcon("Icons.Check");
+                selectedCommitsOnlyFirstParent.Icon = button.CreateMenuIcon("Icons.Check");
             selectedCommitsOnlyFirstParent.Click += (_, ev) =>
             {
                 histories.GraphHighlighting = Models.CommitGraphHighlighting.SelectedCommitsOnlyFirstParent;
@@ -668,7 +662,7 @@ namespace SourceGit.Views
             var currentBranchAndSelectedCommits = new MenuItem();
             currentBranchAndSelectedCommits.Header = App.Text("Histories.HighlightsInGraph.CurrentBranchAndSelectedCommits");
             if (histories.GraphHighlighting == Models.CommitGraphHighlighting.CurrentBranchAndSelectedCommits)
-                currentBranchAndSelectedCommits.Icon = this.CreateMenuIcon("Icons.Check");
+                currentBranchAndSelectedCommits.Icon = button.CreateMenuIcon("Icons.Check");
             currentBranchAndSelectedCommits.Click += (_, ev) =>
             {
                 histories.GraphHighlighting = Models.CommitGraphHighlighting.CurrentBranchAndSelectedCommits;
@@ -682,7 +676,7 @@ namespace SourceGit.Views
             var authorColumn = new MenuItem();
             authorColumn.Header = App.Text("Histories.Header.Author");
             if (histories.IsAuthorColumnVisible)
-                authorColumn.Icon = this.CreateMenuIcon("Icons.Check");
+                authorColumn.Icon = button.CreateMenuIcon("Icons.Check");
             authorColumn.Click += (_, ev) =>
             {
                 histories.IsAuthorColumnVisible = !histories.IsAuthorColumnVisible;
@@ -692,7 +686,7 @@ namespace SourceGit.Views
             var shaColumn = new MenuItem();
             shaColumn.Header = App.Text("Histories.Header.SHA");
             if (histories.IsSHAColumnVisible)
-                shaColumn.Icon = this.CreateMenuIcon("Icons.Check");
+                shaColumn.Icon = button.CreateMenuIcon("Icons.Check");
             shaColumn.Click += (_, ev) =>
             {
                 histories.IsSHAColumnVisible = !histories.IsSHAColumnVisible;
@@ -702,7 +696,7 @@ namespace SourceGit.Views
             var authorTimeColumn = new MenuItem();
             authorTimeColumn.Header = App.Text("Histories.Header.AuthorTime");
             if (histories.IsAuthorTimeColumnVisible)
-                authorTimeColumn.Icon = this.CreateMenuIcon("Icons.Check");
+                authorTimeColumn.Icon = button.CreateMenuIcon("Icons.Check");
             authorTimeColumn.Click += (_, ev) =>
             {
                 histories.IsAuthorTimeColumnVisible = !histories.IsAuthorTimeColumnVisible;
@@ -712,7 +706,7 @@ namespace SourceGit.Views
             var commitTimeColumn = new MenuItem();
             commitTimeColumn.Header = App.Text("Histories.Header.CommitTime");
             if (histories.IsCommitTimeColumnVisible)
-                commitTimeColumn.Icon = this.CreateMenuIcon("Icons.Check");
+                commitTimeColumn.Icon = button.CreateMenuIcon("Icons.Check");
             commitTimeColumn.Click += (_, ev) =>
             {
                 histories.IsCommitTimeColumnVisible = !histories.IsCommitTimeColumnVisible;
@@ -747,6 +741,12 @@ namespace SourceGit.Views
             menu.Items.Add(authorTimeColumn);
             menu.Items.Add(commitTimeColumn);
             menu.Open(button);
+        }
+
+        private void OnOpenAdvancedOptions(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && DataContext is ViewModels.Histories histories)
+                OpenAdvancedOptionsMenu(button, histories);
         }
 
         private void OnCommitListLayoutUpdated(object _1, EventArgs _2)
