@@ -12,6 +12,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace SourceGit.Views
@@ -372,6 +373,39 @@ namespace SourceGit.Views
         public Histories()
         {
             InitializeComponent();
+            FindBarTextBox.AddHandler(KeyDownEvent, OnFindBarKeyDown, RoutingStrategies.Tunnel);
+        }
+
+        public void ShowFindBar()
+        {
+            if (DataContext is not ViewModels.Histories vm)
+                return;
+
+            vm.IsFindBarVisible = true;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                FindBarTextBox.Focus(NavigationMethod.Directional);
+                FindBarTextBox.SelectAll();
+            }, DispatcherPriority.Background);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (!e.Handled &&
+                e.Key == Key.F3 &&
+                DataContext is ViewModels.Histories { IsFindBarVisible: true } vm)
+            {
+                if (e.KeyModifiers == KeyModifiers.Shift)
+                    vm.FindPrev();
+                else
+                    vm.FindNext();
+
+                e.Handled = true;
+                return;
+            }
+
+            base.OnKeyDown(e);
         }
 
         public async Task GotoParent()
@@ -791,6 +825,56 @@ namespace SourceGit.Views
         {
             if (DataContext is ViewModels.Histories histories)
                 CommitListContainer.ScrollIntoView(histories.Commits[0], null);
+        }
+
+        private void OnFindBarKeyDown(object sender, KeyEventArgs e)
+        {
+            if (DataContext is not ViewModels.Histories vm)
+                return;
+
+            switch (e.Key)
+            {
+                case Key.Enter or Key.F3 when e.KeyModifiers == KeyModifiers.Shift:
+                case Key.Up when e.KeyModifiers == KeyModifiers.None:
+                    vm.FindPrev();
+                    e.Handled = true;
+                    break;
+                case Key.Enter or Key.F3 when e.KeyModifiers == KeyModifiers.None:
+                case Key.Down when e.KeyModifiers == KeyModifiers.None:
+                    vm.FindNext();
+                    e.Handled = true;
+                    break;
+                case Key.Escape:
+                    CloseFindBar();
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private void OnFindPrev(object sender, RoutedEventArgs e)
+        {
+            (DataContext as ViewModels.Histories)?.FindPrev();
+            e.Handled = true;
+        }
+
+        private void OnFindNext(object sender, RoutedEventArgs e)
+        {
+            (DataContext as ViewModels.Histories)?.FindNext();
+            e.Handled = true;
+        }
+
+        private void OnCloseFindBar(object sender, RoutedEventArgs e)
+        {
+            CloseFindBar();
+            e.Handled = true;
+        }
+
+        private void CloseFindBar()
+        {
+            if (DataContext is ViewModels.Histories vm)
+                vm.IsFindBarVisible = false;
+
+            CommitListContainer.Focus();
         }
 
         private void OnCommitListContextRequested(object sender, ContextRequestedEventArgs e)

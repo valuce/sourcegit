@@ -37,6 +37,44 @@ namespace SourceGit.ViewModels
             get => _searchCommitContext;
         }
 
+        public bool IsFindBarVisible
+        {
+            get => _isFindBarVisible;
+            set
+            {
+                if (SetProperty(ref _isFindBarVisible, value))
+                    UpdateFindMatches(false);
+            }
+        }
+
+        public string FindFilter
+        {
+            get => _findFilter;
+            set
+            {
+                if (SetProperty(ref _findFilter, value ?? string.Empty))
+                    UpdateFindMatches(true);
+            }
+        }
+
+        public string FindStatus
+        {
+            get => _findStatus;
+            private set => SetProperty(ref _findStatus, value);
+        }
+
+        public bool HasFindMatches
+        {
+            get => _hasFindMatches;
+            private set => SetProperty(ref _hasFindMatches, value);
+        }
+
+        public bool IsFindNotMatched
+        {
+            get => _isFindNotMatched;
+            private set => SetProperty(ref _isFindNotMatched, value);
+        }
+
         public bool EnableTopoOrder
         {
             get => _repo.UIStates.EnableTopoOrderInHistory;
@@ -109,7 +147,10 @@ namespace SourceGit.ViewModels
             {
                 GenerateGraph(value);
                 if (SetProperty(ref _commits, value))
+                {
                     PostCommitsChanged();
+                    UpdateFindMatches(false);
+                }
             }
         }
 
@@ -138,8 +179,13 @@ namespace SourceGit.ViewModels
             set
             {
                 var oldCount = _selectedCommits.Count;
-                if (SetProperty(ref _selectedCommits, value) && oldCount + value.Count > 0)
-                    PostSelectedCommitsChanged();
+                if (SetProperty(ref _selectedCommits, value))
+                {
+                    if (oldCount + value.Count > 0)
+                        PostSelectedCommitsChanged();
+
+                    UpdateFindStatus();
+                }
             }
         }
 
@@ -328,6 +374,16 @@ namespace SourceGit.ViewModels
                     _ignoreSelectionChange = false;
                 });
             });
+        }
+
+        public void FindNext()
+        {
+            GotoFindMatch(true);
+        }
+
+        public void FindPrev()
+        {
+            GotoFindMatch(false);
         }
 
         public async Task<Models.Commit> GetCommitAsync(string sha)
@@ -562,6 +618,114 @@ namespace SourceGit.ViewModels
                 GenerateGraph(_commits);
         }
 
+        private static bool IsFindMatch(Models.Commit commit, string filter)
+        {
+            if (commit.SHA.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (commit.Subject.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (commit.Author.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                commit.Author.Email.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            foreach (var d in commit.Decorators)
+            {
+                if (d.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void UpdateFindMatches(bool selectFirstMatch)
+        {
+            _findMatches.Clear();
+
+            var filter = _findFilter.Trim();
+            if (_isFindBarVisible && filter.Length > 0)
+            {
+                for (var i = 0; i < _commits.Count; i++)
+                {
+                    if (IsFindMatch(_commits[i], filter))
+                        _findMatches.Add(i);
+                }
+            }
+
+            if (selectFirstMatch && _findMatches.Count > 0)
+            {
+                // Stay on the selected commit while it still matches, otherwise move to the next match below it.
+                var pos = _findMatches.BinarySearch(Math.Max(GetFirstSelectedCommitIndex(), 0));
+                if (pos < 0)
+                    pos = ~pos;
+                if (pos >= _findMatches.Count)
+                    pos = 0;
+
+                SelectedCommits = [_commits[_findMatches[pos]]];
+            }
+
+            UpdateFindStatus();
+        }
+
+        private void GotoFindMatch(bool forward)
+        {
+            var count = _findMatches.Count;
+            if (count == 0)
+                return;
+
+            int pos;
+            var selected = GetFirstSelectedCommitIndex();
+            if (selected < 0)
+            {
+                pos = forward ? 0 : count - 1;
+            }
+            else
+            {
+                var found = _findMatches.BinarySearch(selected);
+                if (forward)
+                    pos = found >= 0 ? found + 1 : ~found;
+                else
+                    pos = (found >= 0 ? found : ~found) - 1;
+
+                if (pos >= count)
+                    pos = 0;
+                else if (pos < 0)
+                    pos = count - 1;
+            }
+
+            SelectedCommits = [_commits[_findMatches[pos]]];
+        }
+
+        private void UpdateFindStatus()
+        {
+            var count = _findMatches.Count;
+            HasFindMatches = count > 0;
+
+            if (!_isFindBarVisible || string.IsNullOrWhiteSpace(_findFilter))
+            {
+                FindStatus = string.Empty;
+                IsFindNotMatched = false;
+                return;
+            }
+
+            IsFindNotMatched = count == 0;
+            if (count == 0)
+            {
+                FindStatus = "0/0";
+                return;
+            }
+
+            var selected = GetFirstSelectedCommitIndex();
+            var pos = selected >= 0 ? _findMatches.BinarySearch(selected) : -1;
+            FindStatus = pos >= 0 ? $"{pos + 1}/{count}" : $"?/{count}";
+        }
+
+        private int GetFirstSelectedCommitIndex()
+        {
+            return _selectedCommits.Count > 0 ? _commits.IndexOf(_selectedCommits[0]) : -1;
+        }
+
         private void GenerateGraph(List<Models.Commit> commits)
         {
             var firstParentOnly = _repo.UIStates.HistoryShowFlags.HasFlag(Models.HistoryShowFlags.FirstParentOnly);
@@ -591,6 +755,13 @@ namespace SourceGit.ViewModels
 
         private bool _isSearchingCommits = false;
         private SearchCommitContext _searchCommitContext = null;
+
+        private bool _isFindBarVisible = false;
+        private string _findFilter = string.Empty;
+        private string _findStatus = string.Empty;
+        private bool _hasFindMatches = false;
+        private bool _isFindNotMatched = false;
+        private readonly List<int> _findMatches = [];
 
         private GridLength _leftArea = new(1, GridUnitType.Star);
         private GridLength _rightArea = new(1, GridUnitType.Star);
