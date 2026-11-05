@@ -905,12 +905,16 @@
   <x:String x:Key="Text.SelfUpdate" xml:space="preserve">Проверить обновления...</x:String>
   <x:String x:Key="Text.SelfUpdate.Available" xml:space="preserve">Доступна новая версия программного обеспечения: </x:String>
   <x:String x:Key="Text.SelfUpdate.CurrentVersion" xml:space="preserve">Текущая версия: </x:String>
+  <x:String x:Key="Text.SelfUpdate.Downloading" xml:space="preserve">Загрузка обновления...</x:String>
   <x:String x:Key="Text.SelfUpdate.Error" xml:space="preserve">Не удалось проверить наличие обновлений!</x:String>
   <x:String x:Key="Text.SelfUpdate.GotoDownload" xml:space="preserve">Загрузка</x:String>
   <x:String x:Key="Text.SelfUpdate.IgnoreThisVersion" xml:space="preserve">Пропустить эту версию</x:String>
+  <x:String x:Key="Text.SelfUpdate.Installing" xml:space="preserve">Установка обновления...</x:String>
   <x:String x:Key="Text.SelfUpdate.ReleaseDate" xml:space="preserve">Дата выпуска новой версии: </x:String>
+  <x:String x:Key="Text.SelfUpdate.RestartHint" xml:space="preserve">После установки SourceGit перезапустится.</x:String>
   <x:String x:Key="Text.SelfUpdate.Title" xml:space="preserve">Обновление ПО</x:String>
   <x:String x:Key="Text.SelfUpdate.UpToDate" xml:space="preserve">Сейчас нет обновлений.</x:String>
+  <x:String x:Key="Text.SelfUpdate.UpdateAndRestart" xml:space="preserve">Обновить и перезапустить</x:String>
   <x:String x:Key="Text.SetPushUrl" xml:space="preserve">Установить адрес выгрузки на удалённый</x:String>
   <x:String x:Key="Text.SetPushUrl.PushURL" xml:space="preserve">Адрес выгрузки:</x:String>
   <x:String x:Key="Text.SetPushUrl.Remote" xml:space="preserve">Удалённый:</x:String>
