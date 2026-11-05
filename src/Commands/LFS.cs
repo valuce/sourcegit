@@ -50,7 +50,14 @@ namespace SourceGit.Commands
 
         public async Task PruneAsync()
         {
-            Args = "lfs prune";
+            // A custom `lfs.storage` is usually shared by several repositories, so objects that only the others use
+            // look unreferenced here. In that case only delete objects that the remote of this repository has.
+            var storage = await new Config(WorkingDirectory).GetAsync("lfs.storage").ConfigureAwait(false);
+            if (string.IsNullOrEmpty(storage))
+                Args = "lfs prune";
+            else
+                Args = "lfs prune --verify-remote --verify-unreachable --when-unverified=continue";
+
             await ExecAsync().ConfigureAwait(false);
         }
 

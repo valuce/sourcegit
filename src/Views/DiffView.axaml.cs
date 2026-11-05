@@ -82,6 +82,18 @@ namespace SourceGit.Views
                 vm.CheckSettings();
         }
 
+        private void OnOpenSubmoduleRepository(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { DataContext: Models.SubmoduleDiff diff } && diff.CanOpenRepository)
+            {
+                var launcher = App.GetLauncher();
+                if (launcher?.ActivePage != null)
+                    launcher.OpenSubRepository(launcher.ActivePage, diff.FullPath);
+
+                e.Handled = true;
+            }
+        }
+
         private void OnOpenSubmoduleRevisionCompare(object sender, RoutedEventArgs e)
         {
             if (sender is Button { DataContext: Models.SubmoduleDiff diff } && diff.CanOpenDetails)

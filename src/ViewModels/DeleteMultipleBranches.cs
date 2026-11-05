@@ -32,16 +32,16 @@ namespace SourceGit.ViewModels
             var log = _repo.CreateLog("Delete Multiple Branches");
             Use(log);
 
-            if (_isLocal)
+            for (var i = 0; i < Targets.Count; i++)
             {
-                foreach (var target in Targets)
+                var target = Targets[i];
+                SetProgressStep(i, Targets.Count);
+
+                if (_isLocal)
                     await new Commands.Branch(_repo.FullPath, target.Name)
                         .Use(log)
                         .DeleteLocalAsync(Force);
-            }
-            else
-            {
-                foreach (var target in Targets)
+                else
                     await DeleteRemoteBranchAsync(target, log);
             }
 

@@ -46,7 +46,7 @@ namespace SourceGit.Commands
         public async Task<bool> UpdateAsync(List<string> modules, bool init, bool recursive, bool useRemote)
         {
             var builder = new StringBuilder();
-            builder.Append("submodule update");
+            builder.Append("submodule update --progress");
 
             if (init)
                 builder.Append(" --init");
@@ -62,6 +62,13 @@ namespace SourceGit.Commands
             }
 
             Args = builder.ToString();
+            return await ExecAsync().ConfigureAwait(false);
+        }
+
+        public async Task<bool> CheckoutRecordedRevisionAsync(string module)
+        {
+            // `--checkout` ignores the `submodule.<name>.update` setting, which could rebase or merge instead.
+            Args = $"submodule update --checkout -- {module.Quoted()}";
             return await ExecAsync().ConfigureAwait(false);
         }
 

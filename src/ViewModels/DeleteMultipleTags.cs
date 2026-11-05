@@ -30,8 +30,11 @@ namespace SourceGit.ViewModels
             var log = _repo.CreateLog("Delete Multiple Tags");
             Use(log);
 
-            foreach (var tag in Tags)
+            for (var i = 0; i < Tags.Count; i++)
             {
+                var tag = Tags[i];
+                SetProgressStep(i, Tags.Count);
+
                 var succ = await new Commands.Tag(_repo.FullPath, tag.Name)
                 .Use(log)
                 .DeleteAsync();

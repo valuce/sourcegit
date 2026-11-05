@@ -46,8 +46,11 @@ namespace SourceGit.ViewModels
             var tag = $"refs/tags/{Target.Name}";
             if (_pushAllRemotes)
             {
-                foreach (var remote in _repo.Remotes)
+                for (var i = 0; i < _repo.Remotes.Count; i++)
                 {
+                    var remote = _repo.Remotes[i];
+                    SetProgressStep(i, _repo.Remotes.Count);
+
                     succ = await new Commands.Push(_repo.FullPath, remote, tag, false)
                         .Use(log)
                         .ExecAsync();

@@ -1274,6 +1274,7 @@ namespace SourceGit.ViewModels
                     {
                         Submodules = [];
                         VisibleSubmodules = BuildVisibleSubmodules();
+                        RefreshWorkingCopyChanges();
                     });
                 }
 
@@ -1315,6 +1316,9 @@ namespace SourceGit.ViewModels
                     {
                         Submodules = submodules;
                         VisibleSubmodules = BuildVisibleSubmodules();
+
+                        // Submodules with local changes are listed in the working copy.
+                        RefreshWorkingCopyChanges();
                     }
                 });
             });
@@ -1331,6 +1335,7 @@ namespace SourceGit.ViewModels
             _cancellationRefreshWorkingCopyChanges = new CancellationTokenSource();
             var token = _cancellationRefreshWorkingCopyChanges.Token;
             var noOptionalLocks = Interlocked.Add(ref _queryLocalChangesTimes, 1) > 1;
+            var submodules = _submodules;
 
             Task.Run(async () =>
             {
@@ -1338,6 +1343,18 @@ namespace SourceGit.ViewModels
                     .WithCancellation(token)
                     .GetResultAsync()
                     .ConfigureAwait(false);
+
+                // Git does not report submodules that only have local changes (their commit is unchanged). List them as
+                // modified anyway, so that it is visible before committing that something is pending inside them.
+                foreach (var submodule in submodules)
+                {
+                    if (submodule.Status != Models.SubmoduleStatus.Modified || changes.Find(x => x.Path == submodule.Path) != null)
+                        continue;
+
+                    var change = new Models.Change() { Path = submodule.Path };
+                    change.Set(Models.ChangeState.None, Models.ChangeState.Modified);
+                    changes.Add(change);
+                }
 
                 changes.Sort((l, r) => Models.NumericSort.Compare(l.Path, r.Path));
 

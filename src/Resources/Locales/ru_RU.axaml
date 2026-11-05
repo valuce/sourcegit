@@ -395,6 +395,7 @@
   <x:String x:Key="Text.Diff.Submodule" xml:space="preserve">ПОДМОДУЛЬ</x:String>
   <x:String x:Key="Text.Diff.Submodule.Deleted" xml:space="preserve">УДАЛЁН</x:String>
   <x:String x:Key="Text.Diff.Submodule.New" xml:space="preserve">НОВЫЙ</x:String>
+  <x:String x:Key="Text.Diff.Submodule.Open" xml:space="preserve">ОТКРЫТЬ ПОДМОДУЛЬ</x:String>
   <x:String x:Key="Text.Diff.Submodule.UncommittedChanges" xml:space="preserve">+ {0} Незафиксированных изменений</x:String>
   <x:String x:Key="Text.Diff.SwapCommits" xml:space="preserve">Обмен</x:String>
   <x:String x:Key="Text.Diff.SyntaxHighlight" xml:space="preserve">Подсветка синтаксиса </x:String>
@@ -807,6 +808,8 @@
   <x:String x:Key="Text.Repository.BranchSort.ByCommitterDate" xml:space="preserve">По дате ревизора (исполнителя)</x:String>
   <x:String x:Key="Text.Repository.BranchSort.ByName" xml:space="preserve">По имени</x:String>
   <x:String x:Key="Text.Repository.Clean" xml:space="preserve">Очистить (Сбор мусора и удаление) </x:String>
+  <x:String x:Key="Text.Repository.Clean.IncludeSubmodules" xml:space="preserve">Включая подмодули</x:String>
+  <x:String x:Key="Text.Repository.Clean.PruneLFS" xml:space="preserve">Удалить неиспользуемые объекты Git LFS</x:String>
   <x:String x:Key="Text.Repository.CleanTips" xml:space="preserve">Запустить команду (git gc) для данного репозитория.</x:String>
   <x:String x:Key="Text.Repository.ClearAllCommitsFilter" xml:space="preserve">Очистить всё</x:String>
   <x:String x:Key="Text.Repository.ClearStashes" xml:space="preserve">Очистить</x:String>

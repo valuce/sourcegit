@@ -97,6 +97,8 @@ namespace SourceGit.Models
         public RevisionSubmodule Old { get; set; } = null;
         public RevisionSubmodule New { get; set; } = null;
 
+        public bool CanOpenRepository => File.Exists(Path.Combine(FullPath, ".git")) || Directory.Exists(Path.Combine(FullPath, ".git"));
+
         public bool CanOpenDetails => File.Exists(Path.Combine(FullPath, ".git")) &&
             Old != null && Old.Commit.Author != User.Invalid &&
             New != null && New.Commit.Author != User.Invalid;

@@ -13,6 +13,7 @@
     <StackPanel Orientation="Horizontal" Margin="0,8">
       <ContentPresenter x:Name="Icon" Width="12" Height="12"/>
       <TextBlock Margin="6,0,0,0" FontSize="14" FontWeight="Bold" Text="{DynamicResource Text.Running}"/>
+      <TextBlock x:Name="ProgressText" Margin="6,0,0,0" FontSize="14" Foreground="{DynamicResource Brush.FG2}"/>
     </StackPanel>
 
     <TextBlock HorizontalAlignment="Stretch"

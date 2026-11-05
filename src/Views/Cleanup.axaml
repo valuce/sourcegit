@@ -20,5 +20,18 @@
     <TextBlock Text="{DynamicResource Text.Repository.CleanTips}"
                Margin="0,16,0,0"
                HorizontalAlignment="Center"/>
+
+    <StackPanel Margin="0,8,0,0" Orientation="Vertical" HorizontalAlignment="Center">
+      <CheckBox Height="32"
+                Content="{DynamicResource Text.Repository.Clean.IncludeSubmodules}"
+                IsChecked="{Binding IncludeSubmodules, Mode=TwoWay}"
+                IsVisible="{Binding HasSubmodules}"/>
+
+      <CheckBox Height="32"
+                Content="{DynamicResource Text.Repository.Clean.PruneLFS}"
+                IsChecked="{Binding PruneLFSObjects, Mode=TwoWay}"
+                IsVisible="{Binding CanPruneLFSObjects}"
+                ToolTip.Tip="git lfs prune"/>
+    </StackPanel>
   </StackPanel>
 </UserControl>
