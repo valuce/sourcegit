@@ -23,8 +23,107 @@
       <ColumnDefinition Width="{Binding RightArea, Mode=TwoWay}" MinWidth="100"/>
     </v:HistoriesLayout.ColumnDefinitions>
 
-    <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-      <v:HistoriesCommitList x:Name="CommitListContainer"
+    <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="Auto,*">
+      <!-- Find Bar (Ctrl+F) -->
+      <Border Grid.Row="0"
+              Height="34"
+              Padding="6,0,4,0"
+              Background="{DynamicResource Brush.Popup}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              IsVisible="{Binding IsFindBarVisible, Mode=OneWay}">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+          <TextBox Grid.Column="0"
+                   x:Name="FindBarTextBox"
+                   Height="26"
+                   BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}"
+                   Background="{DynamicResource Brush.Contents}"
+                   CornerRadius="4"
+                   VerticalAlignment="Center"
+                   Watermark="{DynamicResource Text.Histories.Find.Placeholder}"
+                   Text="{Binding FindFilter, Mode=TwoWay}">
+            <TextBox.InnerLeftContent>
+              <Path Width="14" Height="14" Margin="6,0,0,0" Fill="{DynamicResource Brush.FG2}" Data="{StaticResource Icons.Search}"/>
+            </TextBox.InnerLeftContent>
+
+            <TextBox.InnerRightContent>
+              <TextBlock Margin="4,0,8,0"
+                         VerticalAlignment="Center"
+                         FontFeatures="+tnum"
+                         Text="{Binding FindStatus, Mode=OneWay}"
+                         Classes.not_matched="{Binding IsFindNotMatched, Mode=OneWay}">
+                <TextBlock.Styles>
+                  <Style Selector="TextBlock">
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}"/>
+                  </Style>
+                  <Style Selector="TextBlock.not_matched">
+                    <Setter Property="Foreground" Value="OrangeRed"/>
+                  </Style>
+                </TextBlock.Styles>
+              </TextBlock>
+            </TextBox.InnerRightContent>
+          </TextBox>
+
+          <Button Grid.Column="1"
+                  Classes="icon_button"
+                  Width="26" Height="26"
+                  Margin="4,0,0,0"
+                  Focusable="False"
+                  IsEnabled="{Binding HasFindMatches, Mode=OneWay}"
+                  Click="OnFindPrev">
+            <ToolTip.Tip>
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource Text.Histories.Find.Prev}" VerticalAlignment="Center"/>
+                <TextBlock Margin="16,0,0,0"
+                           Text="Shift+Enter"
+                           Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+            </ToolTip.Tip>
+            <Path Width="10" Height="10" Data="{StaticResource Icons.TriangleLeft}"/>
+          </Button>
+
+          <Button Grid.Column="2"
+                  Classes="icon_button"
+                  Width="26" Height="26"
+                  Focusable="False"
+                  IsEnabled="{Binding HasFindMatches, Mode=OneWay}"
+                  Click="OnFindNext">
+            <ToolTip.Tip>
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource Text.Histories.Find.Next}" VerticalAlignment="Center"/>
+                <TextBlock Margin="16,0,0,0"
+                           Text="Enter"
+                           Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+            </ToolTip.Tip>
+            <Path Width="10" Height="10" Data="{StaticResource Icons.TriangleRight}"/>
+          </Button>
+
+          <Button Grid.Column="3"
+                  Classes="icon_button"
+                  Width="26" Height="26"
+                  Focusable="False"
+                  Click="OnCloseFindBar">
+            <ToolTip.Tip>
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource Text.Histories.Find.Close}" VerticalAlignment="Center"/>
+                <TextBlock Margin="16,0,0,0"
+                           Text="Esc"
+                           Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+            </ToolTip.Tip>
+            <Path Width="11" Height="11" Data="{StaticResource Icons.Close}"/>
+          </Button>
+        </Grid>
+      </Border>
+
+      <v:HistoriesCommitList Grid.Row="1"
+                             x:Name="CommitListContainer"
                              Classes="static_scrollbar"
                              ScrollViewer.AllowAutoHide="False"
                              Background="Transparent"
@@ -242,7 +341,8 @@
         </DataGrid.Columns>
       </v:HistoriesCommitList>
 
-      <Border Background="Transparent"
+      <Border Grid.Row="1"
+              Background="Transparent"
               Height="24"
               HorizontalAlignment="Stretch" VerticalAlignment="Top"
               PointerMoved="OnCommitListHeaderPointerMoved"
@@ -275,7 +375,8 @@
         </StackPanel>
       </Border>
 
-      <v:CommitGraph x:Name="CommitGraph"
+      <v:CommitGraph Grid.Row="1"
+                     x:Name="CommitGraph"
                      Margin="0,24,0,0"
                      Graph="{Binding Graph}"
                      DotBrush="{DynamicResource Brush.Contents}"
@@ -284,7 +385,8 @@
                      ClipToBounds="True"
                      Loaded="OnCommitGraphLoaded"/>
 
-      <Border Width="28" Height="28"
+      <Border Grid.Row="1"
+              Width="28" Height="28"
               Margin="0,0,16,8"
               CornerRadius="14"
               Background="{DynamicResource Brush.Popup}"
@@ -298,7 +400,7 @@
               Opacity=".8"/>
       </Border>
 
-      <v:LoadingIcon Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsLoading}"/>
+      <v:LoadingIcon Grid.Row="1" Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsLoading}"/>
     </Grid>
 
     <GridSplitter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"

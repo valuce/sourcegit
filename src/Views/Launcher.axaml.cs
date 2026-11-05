@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace SourceGit.Views
 {
@@ -273,6 +274,11 @@ namespace SourceGit.Views
                             return;
                         case Key.F when e.KeyModifiers.HasFlag(KeyModifiers.Shift):
                             repo.Histories.IsSearchingCommits = !repo.Histories.IsSearchingCommits;
+                            e.Handled = true;
+                            return;
+                        case Key.F when e.KeyModifiers == cmdKey && repo.IsDashboardVisible && vm.ActivePage.Popup == null:
+                            if (this.FindDescendantOfType<Histories>() is { } histories && histories.DataContext == repo.Histories)
+                                histories.ShowFindBar();
                             e.Handled = true;
                             return;
                         case Key.B when e.KeyModifiers.HasFlag(KeyModifiers.Shift):

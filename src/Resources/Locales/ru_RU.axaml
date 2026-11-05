@@ -519,6 +519,10 @@
   <x:String x:Key="Text.GitLFS.TrackByExtension" xml:space="preserve">Отслеживать все файлы (*{0})</x:String>
   <x:String x:Key="Text.GotoRevisionSelector" xml:space="preserve">Выбрать ревизию</x:String>
   <x:String x:Key="Text.Histories.AdvancedOptions" xml:space="preserve">Расширенные опции</x:String>
+  <x:String x:Key="Text.Histories.Find.Close" xml:space="preserve">Закрыть</x:String>
+  <x:String x:Key="Text.Histories.Find.Next" xml:space="preserve">Следующее совпадение</x:String>
+  <x:String x:Key="Text.Histories.Find.Placeholder" xml:space="preserve">Поиск по SHA, ветке, автору или сообщению</x:String>
+  <x:String x:Key="Text.Histories.Find.Prev" xml:space="preserve">Предыдущее совпадение</x:String>
   <x:String x:Key="Text.Histories.Header.Author" xml:space="preserve">АВТОР</x:String>
   <x:String x:Key="Text.Histories.Header.AuthorTime" xml:space="preserve">ВРЕМЯ АВТОРА</x:String>
   <x:String x:Key="Text.Histories.Header.CommitTime" xml:space="preserve">ВРЕМЯ РЕВИЗИИ</x:String>
@@ -556,6 +560,7 @@
   <x:String x:Key="Text.Hotkeys.Repo.CommitWithAutoStage" xml:space="preserve">Сформировать все изменения и зафиксировать</x:String>
   <x:String x:Key="Text.Hotkeys.Repo.CreateBranch" xml:space="preserve">Создать новую ветку</x:String>
   <x:String x:Key="Text.Hotkeys.Repo.Fetch" xml:space="preserve">Извлечь (fetch), запускается сразу</x:String>
+  <x:String x:Key="Text.Hotkeys.Repo.FindInHistory" xml:space="preserve">Найти ревизию в истории по SHA, ветке, автору или сообщению</x:String>
   <x:String x:Key="Text.Hotkeys.Repo.GoToChild" xml:space="preserve">К дочернему выбранной ревизии</x:String>
   <x:String x:Key="Text.Hotkeys.Repo.GoToParent" xml:space="preserve">К родительскому выбранной ревизии</x:String>
   <x:String x:Key="Text.Hotkeys.Repo.OpenCommandPalette" xml:space="preserve">Открыть палитру команд</x:String>
