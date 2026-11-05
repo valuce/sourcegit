@@ -1173,12 +1173,13 @@
     <Setter Property="Height" Value="28"/>
     <Setter Property="Margin" Value="6,0,0,0"/>
     <Setter Property="Padding" Value="0"/>
-    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Background" Value="{DynamicResource Brush.Window}"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
     <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="ZIndex" Value="1"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Grid ColumnDefinitions="Auto,*" Background="Transparent">
+        <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
           <Path Grid.Column="0"
                 x:Name="PART_IndicatorIcon"
                 Width="10"
@@ -1200,6 +1201,13 @@
                             RecognizesAccessKey="True"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch" />
+          <Border Grid.Column="0" Grid.ColumnSpan="2"
+                  x:Name="PART_StuckLine"
+                  Height="1"
+                  VerticalAlignment="Bottom"
+                  Background="{DynamicResource Brush.Border0}"
+                  IsHitTestVisible="False"
+                  Opacity="0"/>
         </Grid>
       </ControlTemplate>
     </Setter>
@@ -1215,6 +1223,9 @@
   </Style>
   <Style Selector="ToggleButton.group_expander:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="ToggleButton.group_expander.stuck /template/ Border#PART_StuckLine">
+    <Setter Property="Opacity" Value="1"/>
   </Style>
 
   <Style Selector="ToggleButton.filter_expander">
