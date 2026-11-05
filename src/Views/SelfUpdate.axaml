@@ -72,7 +72,20 @@
               <StackPanel Margin="0,8,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Classes="flat primary"
                         Height="30"
+                        Click="UpdateAndRestart"
+                        IsVisible="{Binding CanInstallAutomatically}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                  <StackPanel Orientation="Horizontal">
+                    <Path Width="12" Height="12" Data="{StaticResource Icons.SoftwareUpdate}" Fill="{DynamicResource AccentButtonForeground}"/>
+                    <TextBlock Text="{DynamicResource Text.SelfUpdate.UpdateAndRestart}" Margin="8,0,0,0" Foreground="{DynamicResource AccentButtonForeground}"/>
+                  </StackPanel>
+                </Button>
+
+                <Button Classes="flat primary"
+                        Height="30"
                         Click="GotoDownload"
+                        IsVisible="{Binding !CanInstallAutomatically}"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center">
                   <StackPanel Orientation="Horizontal">
@@ -93,6 +106,31 @@
                   </StackPanel>
                 </Button>
               </StackPanel>
+            </StackPanel>
+          </DataTemplate>
+
+          <DataTemplate DataType="vm:SelfUpdateInstalling">
+            <StackPanel Orientation="Vertical" Margin="16,8" Width="420">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                <Path Width="14" Height="14" Data="{StaticResource Icons.SoftwareUpdate}"/>
+                <TextBlock Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.SelfUpdate.Downloading}" IsVisible="{Binding !IsApplying}"/>
+                <TextBlock Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.SelfUpdate.Installing}" IsVisible="{Binding IsApplying}"/>
+                <Border Margin="4,0,0,0" Height="20" CornerRadius="10" Background="{DynamicResource Brush.Accent}" Effect="drop-shadow(0 0 6 #40000000)">
+                  <TextBlock Margin="8,0" Text="{Binding Version.TagName}" FontSize="12" Foreground="White"/>
+                </Border>
+              </StackPanel>
+
+              <ProgressBar Margin="0,8,0,0"
+                           HorizontalAlignment="Stretch"
+                           Background="{DynamicResource Brush.FG2}" Foreground="{DynamicResource Brush.Accent}"
+                           Minimum="0" Maximum="100"
+                           Value="{Binding Percent}"
+                           IsIndeterminate="{Binding IsApplying}"/>
+
+              <TextBlock Margin="0,8"
+                         HorizontalAlignment="Center"
+                         Foreground="{DynamicResource Brush.FG2}"
+                         Text="{DynamicResource Text.SelfUpdate.RestartHint}"/>
             </StackPanel>
           </DataTemplate>
 

@@ -56,7 +56,7 @@ namespace SourceGit.Views
             base.OnDataContextChanged(e);
 
             if (DataContext is Models.Version ver)
-                Text = ver.Body;
+                Text = ver.Body ?? string.Empty;
         }
 
         private TextMate.Installation _textMate = null;
@@ -70,6 +70,12 @@ namespace SourceGit.Views
             InitializeComponent();
         }
 
+        protected override void OnClosing(WindowClosingEventArgs e)
+        {
+            base.OnClosing(e);
+            (DataContext as ViewModels.SelfUpdate)?.CancelInstall();
+        }
+
         private void CloseWindow(object _1, RoutedEventArgs _2)
         {
             Close();
@@ -77,8 +83,19 @@ namespace SourceGit.Views
 
         private void GotoDownload(object _, RoutedEventArgs e)
         {
-            Native.OS.OpenBrowser("https://github.com/sourcegit-scm/sourcegit/releases/latest");
+            Native.OS.OpenBrowser(Models.SelfUpdater.ReleasesPage);
             e.Handled = true;
+        }
+
+        private async void UpdateAndRestart(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            if (sender is not Button { DataContext: Models.Version ver } || DataContext is not ViewModels.SelfUpdate vm)
+                return;
+
+            if (await vm.InstallAsync(ver))
+                vm.Restart();
         }
 
         private void IgnoreThisVersion(object sender, RoutedEventArgs e)

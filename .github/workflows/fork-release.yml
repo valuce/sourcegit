@@ -1,0 +1,64 @@
+# Release of the valuce fork (Windows x64 only).
+#
+# How to publish a new version that installed copies pick up through "Update & Restart":
+#   1. Put the new version into the VERSION file, e.g. 2026.23.2 (third number = fork build).
+#   2. Commit, then tag that commit with the same version and push the tag:
+#        git tag v2026.23.2
+#        git push valuce v2026.23.2
+#   3. This workflow builds SourceGit, packs `sourcegit_<version>.win-x64.zip` and creates
+#      the GitHub release. Release notes are the commit subjects since the previous v* tag.
+#
+# The app checks https://api.github.com/repos/valuce/sourcegit/releases/latest
+# (see src/Models/SelfUpdater.cs), so drafts and pre-releases are not offered as updates.
+name: Release (fork)
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+permissions:
+  contents: write
+jobs:
+  release:
+    name: Build and release win-x64
+    runs-on: windows-2022
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Check that VERSION matches the tag
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            throw "VERSION file says '$version' but the tag is '$env:GITHUB_REF_NAME'. Update VERSION and tag again."
+          }
+          "VERSION=$version" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Publish
+        run: dotnet publish src/SourceGit.csproj -c Release -r win-x64 -o build/SourceGit
+      - name: Package
+        shell: pwsh
+        run: |
+          Remove-Item build/SourceGit/*.pdb -Force
+          Compress-Archive -Path build/SourceGit/* -DestinationPath "build/sourcegit_$env:VERSION.win-x64.zip" -Force
+      - name: Write release notes
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $previous = git describe --tags --abbrev=0 --match 'v*' "$tag^" 2>$null
+          if ($LASTEXITCODE -eq 0 -and $previous) {
+            $changes = git log --no-merges --pretty="- %s" "$previous..$tag"
+          } else {
+            $changes = git log --no-merges --pretty="- %s" -20 $tag
+          }
+          "## Changes`n`n" + ($changes -join "`n") | Out-File notes.md -Encoding utf8
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create $env:GITHUB_REF_NAME "build/sourcegit_$env:VERSION.win-x64.zip" --title $env:VERSION --notes-file notes.md
