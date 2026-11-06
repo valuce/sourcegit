@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Avalonia;
@@ -81,6 +82,7 @@ namespace SourceGit.Views
             var separatorPen = new Pen(new SolidColorBrush(ActualThemeVariant == ThemeVariant.Dark ? Colors.White : Colors.Black, 0.2));
             var separatorY = (height - 18) * 0.5 + 1;
 
+
             if (!_isScrollButtonVisible && selectedIdx > 0)
             {
                 var container = LauncherTabsList.ContainerFromIndex(0);
@@ -111,6 +113,19 @@ namespace SourceGit.Views
                 context.DrawLine(separatorPen, new Point(separatorX, separatorY), new Point(separatorX, separatorY + 18));
             }
 
+            DrawActiveTab(context, selectedIdx, startX, endX, height);
+
+            var groups = (DataContext as ViewModels.Launcher)?.GetTabGroups();
+            if (groups is { Count: > 0 })
+            {
+                var tabsClip = new Rect(LauncherTabsScroller.Bounds.X, 0, LauncherTabsScroller.Bounds.Width, Bounds.Height);
+                using (context.PushClip(tabsClip))
+                    DrawTabGroupUnderlines(context, groups, startX, height);
+            }
+        }
+
+        private void DrawActiveTab(DrawingContext context, int selectedIdx, double startX, double endX, double height)
+        {
             var selected = LauncherTabsList.ContainerFromIndex(selectedIdx);
             if (selected == null)
                 return;
@@ -159,6 +174,36 @@ namespace SourceGit.Views
             var fill = this.FindResource("Brush.ToolBar") as IBrush;
             var stroke = new Pen(this.FindResource("Brush.Border0") as IBrush);
             context.DrawGeometry(fill, stroke, geo);
+        }
+
+        // A solid line along the bottom of each group, like Chrome's tab groups.
+        private void DrawTabGroupUnderlines(DrawingContext context, List<ViewModels.LauncherTabGroup> groups, double startX, double height)
+        {
+            foreach (var group in groups)
+            {
+                if (!TryGetTabGroupSpan(group, startX, out var left, out var right, out var color))
+                    continue;
+
+                var line = new Rect(left + 1, height - 2.5, Math.Max(0, right - left - 2), 2.5);
+                context.DrawRectangle(new SolidColorBrush(color), null, new RoundedRect(line, 1.25));
+            }
+        }
+
+        private bool TryGetTabGroupSpan(ViewModels.LauncherTabGroup group, double startX, out double left, out double right, out Color color)
+        {
+            left = right = 0;
+            color = Colors.Transparent;
+
+            var first = LauncherTabsList.ContainerFromIndex(group.Start);
+            var last = LauncherTabsList.ContainerFromIndex(group.End);
+            if (first == null || last == null || Models.Bookmarks.Get(group.ColorIndex) is not ISolidColorBrush brush)
+                return false;
+
+            var offset = LauncherTabsScroller.Bounds.X - startX;
+            left = first.Bounds.Left + offset;
+            right = last.Bounds.Right + offset;
+            color = brush.Color;
+            return right > left;
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -391,6 +436,18 @@ namespace SourceGit.Views
                     ev.Handled = true;
                 };
                 menu.Items.Add(close);
+
+                if (vm.FindTabGroup(page) != null)
+                {
+                    var closeGroup = new MenuItem();
+                    closeGroup.Header = App.Text("PageTabBar.Tab.CloseGroup");
+                    closeGroup.Click += (_, ev) =>
+                    {
+                        vm.CloseTabGroup(page);
+                        ev.Handled = true;
+                    };
+                    menu.Items.Add(closeGroup);
+                }
 
                 var closeOthers = new MenuItem();
                 closeOthers.Header = App.Text("PageTabBar.Tab.CloseOther");
