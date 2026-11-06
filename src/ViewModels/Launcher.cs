@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Avalonia.Collections;
 using Avalonia.Threading;
@@ -53,9 +55,11 @@ namespace SourceGit.ViewModels
             Pages = new AvaloniaList<LauncherPage>();
             AddNewTab();
 
+            _isRestoringTabs = true;
             var repos = ActiveWorkspace.Repositories.ToArray();
             foreach (var repo in repos)
                 OpenRepositoryInTab(repo, null);
+            _isRestoringTabs = false;
 
             _ignoreIndexChange = false;
 
@@ -140,9 +144,11 @@ namespace SourceGit.ViewModels
             Pages.Clear();
             AddNewTab();
 
+            _isRestoringTabs = true;
             var repos = to.Repositories.ToArray();
             foreach (var repo in repos)
                 OpenRepositoryInTab(repo, null);
+            _isRestoringTabs = false;
 
             var activeIdx = to.ActiveIdx;
             if (activeIdx >= 0 && activeIdx < Pages.Count)
@@ -163,23 +169,24 @@ namespace SourceGit.ViewModels
             ActivePage = page;
         }
 
+        public List<LauncherTabGroup> GetTabGroups()
+        {
+            return LauncherTabGroup.Collect(Pages);
+        }
+
+        public LauncherTabGroup FindTabGroup(LauncherPage page)
+        {
+            return LauncherTabGroup.Find(Pages, page);
+        }
+
         public void MoveTab(LauncherPage from, LauncherPage to)
         {
-            _ignoreIndexChange = true;
+            var order = LauncherTabGroup.ReorderForMove(Pages, from, to);
+            if (order != null)
+                ApplyTabOrder(order);
 
-            var fromIdx = Pages.IndexOf(from);
-            var toIdx = Pages.IndexOf(to);
-            Pages.Move(fromIdx, toIdx);
-
-            _activeWorkspace.Repositories.Clear();
-            foreach (var p in Pages)
-            {
-                if (p.Data is Repository r)
-                    _activeWorkspace.Repositories.Add(r.FullPath);
-            }
-
-            _ignoreIndexChange = false;
             ActivePage = from;
+            PostActivePageChanged();
         }
 
         public void GotoNextTab()
@@ -243,6 +250,30 @@ namespace SourceGit.ViewModels
             CloseRepositoryInTab(page);
             Pages.RemoveAt(removeIdx);
             GC.Collect();
+        }
+
+        public void CloseTabGroup(LauncherPage page)
+        {
+            var group = FindTabGroup(page);
+            if (group == null)
+            {
+                CloseTab(page);
+                return;
+            }
+
+            var members = Pages.Skip(group.Start).Take(group.Count).ToList();
+
+            // Leave the group before closing it, so its other tabs are not activated one by one.
+            if (members.Contains(_activePage))
+            {
+                if (group.Start > 0)
+                    ActivePage = Pages[group.Start - 1];
+                else if (group.End + 1 < Pages.Count)
+                    ActivePage = Pages[group.End + 1];
+            }
+
+            for (var i = members.Count - 1; i >= 0; i--)
+                CloseTab(members[i]);
         }
 
         public void CloseOtherTabs()
@@ -358,12 +389,8 @@ namespace SourceGit.ViewModels
                 page.Data = repo;
             }
 
-            _activeWorkspace.Repositories.Clear();
-            foreach (var p in Pages)
-            {
-                if (p.Data is Repository r)
-                    _activeWorkspace.Repositories.Add(r.FullPath);
-            }
+            ArrangeOpenedTab(page);
+            RebuildWorkspaceRepositories();
 
             if (_activePage == page)
                 PostActivePageChanged();
@@ -433,8 +460,46 @@ namespace SourceGit.ViewModels
             var page = new LauncherPage(node, repo);
             var idxOfOwner = Pages.IndexOf(ownerPage);
             Pages.Insert(idxOfOwner + 1, page);
-            _activeWorkspace.Repositories.Insert(idxOfOwner + 1, normalizedPath);
+            ArrangeOpenedTab(page);
+            RebuildWorkspaceRepositories();
             ActivePage = page;
+        }
+
+        // Skipped while a workspace is being restored, so a saved tab order is kept as is.
+        private void ArrangeOpenedTab(LauncherPage page)
+        {
+            if (_isRestoringTabs)
+                return;
+
+            var order = LauncherTabGroup.ReorderForOpen(Pages, page);
+            if (order != null)
+                ApplyTabOrder(order);
+        }
+
+        private void ApplyTabOrder(List<LauncherPage> order)
+        {
+            var ignoreIndexChange = _ignoreIndexChange;
+            _ignoreIndexChange = true;
+
+            for (var i = 0; i < order.Count; i++)
+            {
+                var current = Pages.IndexOf(order[i]);
+                if (current != i)
+                    Pages.Move(current, i);
+            }
+
+            RebuildWorkspaceRepositories();
+            _ignoreIndexChange = ignoreIndexChange;
+        }
+
+        private void RebuildWorkspaceRepositories()
+        {
+            _activeWorkspace.Repositories.Clear();
+            foreach (var p in Pages)
+            {
+                if (p.Data is Repository r)
+                    _activeWorkspace.Repositories.Add(r.FullPath);
+            }
         }
 
         private void DispatchNotification(Models.Notification notification)
@@ -527,6 +592,7 @@ namespace SourceGit.ViewModels
         private Workspace _activeWorkspace;
         private LauncherPage _activePage;
         private bool _ignoreIndexChange;
+        private bool _isRestoringTabs;
         private ICommandPalette _commandPalette;
         private Models.Version _newVersion = null;
     }

@@ -654,6 +654,7 @@
   <x:String x:Key="Text.Optional" xml:space="preserve">Необязательно.</x:String>
   <x:String x:Key="Text.PageTabBar.New" xml:space="preserve">Создать новую вкладку</x:String>
   <x:String x:Key="Text.PageTabBar.Tab.Close" xml:space="preserve">Закрыть вкладку</x:String>
+  <x:String x:Key="Text.PageTabBar.Tab.CloseGroup" xml:space="preserve">Закрыть группу вкладок</x:String>
   <x:String x:Key="Text.PageTabBar.Tab.CloseOther" xml:space="preserve">Закрыть другие вкладки</x:String>
   <x:String x:Key="Text.PageTabBar.Tab.CloseRight" xml:space="preserve">Закрыть вкладки справа</x:String>
   <x:String x:Key="Text.PageTabBar.Tab.CopyPath" xml:space="preserve">Копировать путь репозитория</x:String>
