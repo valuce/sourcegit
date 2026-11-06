@@ -1180,6 +1180,13 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Grid ColumnDefinitions="Auto,*" Background="{TemplateBinding Background}">
+          <Border Grid.Column="0" Grid.ColumnSpan="2"
+                  x:Name="PART_FocusHighlight"
+                  Margin="-2,2,4,2"
+                  CornerRadius="4"
+                  Background="{DynamicResource Brush.Accent}"
+                  IsHitTestVisible="False"
+                  Opacity="0"/>
           <Path Grid.Column="0"
                 x:Name="PART_IndicatorIcon"
                 Width="10"
@@ -1226,6 +1233,12 @@
   </Style>
   <Style Selector="ToggleButton.group_expander.stuck /template/ Border#PART_StuckLine">
     <Setter Property="Opacity" Value="1"/>
+  </Style>
+  <Style Selector="ToggleButton.group_expander:focus /template/ Border#PART_FocusHighlight">
+    <Setter Property="Opacity" Value=".65"/>
+  </Style>
+  <Style Selector="ToggleButton.group_expander:focus /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
   </Style>
 
   <Style Selector="ToggleButton.filter_expander">
