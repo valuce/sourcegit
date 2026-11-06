@@ -94,6 +94,7 @@ namespace SourceGit.Views
 
             LeftSidebarGroups.AddHandler(RequestBringIntoViewEvent, OnLeftSidebarRequestBringIntoView);
             LeftSidebarGroups.AddHandler(KeyDownEvent, OnLeftSidebarKeyDown, RoutingStrategies.Tunnel);
+            FilterBox.AddHandler(KeyDownEvent, OnLeftSidebarFilterKeyDown, RoutingStrategies.Tunnel);
         }
 
         protected override void OnLoaded(RoutedEventArgs e)
@@ -327,14 +328,198 @@ namespace SourceGit.Views
 
         private void OnLeftSidebarKeyDown(object _, KeyEventArgs e)
         {
-            // The lists inside can not scroll by themselves anymore, so page the whole sidebar instead.
-            if (e.Key is not (Key.PageUp or Key.PageDown) || e.KeyModifiers != KeyModifiers.None)
+            if (e.KeyModifiers != KeyModifiers.None)
                 return;
 
-            var page = Math.Max(24.0, LeftSidebarScroller.Viewport.Height - 28.0);
-            var offset = LeftSidebarScroller.Offset;
-            LeftSidebarScroller.Offset = offset.WithY(e.Key == Key.PageUp ? offset.Y - page : offset.Y + page);
-            e.Handled = true;
+            if (e.Key is Key.PageUp or Key.PageDown)
+            {
+                // The lists inside can not scroll by themselves anymore, so page the whole sidebar instead.
+                var page = Math.Max(24.0, LeftSidebarScroller.Viewport.Height - 28.0);
+                var offset = LeftSidebarScroller.Offset;
+                LeftSidebarScroller.Offset = offset.WithY(e.Key == Key.PageUp ? offset.Y - page : offset.Y + page);
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key is not (Key.Up or Key.Down or Key.Left or Key.Right))
+                return;
+
+            // Arrow keys walk through the whole sidebar as one tree: the group headers and the rows of the expanded groups.
+            var group = Array.FindIndex(_leftSidebarGroups, g => g.Header == e.Source);
+            if (group >= 0)
+                e.Handled = OnLeftSidebarHeaderKeyDown(group, e.Key);
+            else if (e.Source is Visual source && source.FindAncestorOfType<ListBoxItem>(true) is { } item)
+                e.Handled = OnLeftSidebarRowKeyDown(item, e.Key);
+        }
+
+        private void OnLeftSidebarFilterKeyDown(object _, KeyEventArgs e)
+        {
+            if (e.Key == Key.Down && e.KeyModifiers == KeyModifiers.None && FocusLeftSidebarHeader(0, 1))
+                e.Handled = true;
+        }
+
+        private bool OnLeftSidebarHeaderKeyDown(int group, Key key)
+        {
+            var header = _leftSidebarGroups[group].Header;
+            switch (key)
+            {
+                case Key.Up:
+                    // Previous group: its last row if it is expanded, its header otherwise. Above the first group is the filter.
+                    for (var i = group - 1; i >= 0; i--)
+                    {
+                        if (!_leftSidebarGroups[i].Header.IsVisible)
+                            continue;
+
+                        if (GetLeftSidebarGroupList(i) is { ItemCount: > 0 } prev)
+                            FocusLeftSidebarRow(prev, prev.ItemCount - 1);
+                        else
+                            FocusLeftSidebarHeader(i, -1);
+
+                        return true;
+                    }
+
+                    FilterBox.Focus(NavigationMethod.Directional);
+                    return true;
+                case Key.Down:
+                    if (GetLeftSidebarGroupList(group) is { ItemCount: > 0 } list)
+                        FocusLeftSidebarRow(list, 0);
+                    else
+                        FocusLeftSidebarHeader(group + 1, 1);
+                    return true;
+                case Key.Left:
+                    if (header.IsChecked == true)
+                    {
+                        header.IsChecked = false;
+
+                        // Same as collapsing a pinned group with the mouse: keep its header in place.
+                        if (header.Classes.Contains("stuck"))
+                            LeftSidebarScroller.Offset = new Vector(0, header.Bounds.Top);
+                    }
+                    return true;
+                case Key.Right:
+                    if (header.IsChecked != true)
+                        header.IsChecked = true;
+                    else if (GetLeftSidebarGroupList(group) is { ItemCount: > 0 } rows)
+                        FocusLeftSidebarRow(rows, 0);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool OnLeftSidebarRowKeyDown(ListBoxItem item, Key key)
+        {
+            var list = item.FindAncestorOfType<ListBox>();
+            if (list == null)
+                return false;
+
+            var group = Array.FindIndex(_leftSidebarGroups, g => g.Content == list || g.Content.IsVisualAncestorOf(list));
+            var index = list.IndexFromContainer(item);
+            if (group < 0 || index < 0)
+                return false;
+
+            var content = _leftSidebarGroups[group].Content;
+            var (depth, isFolder, isExpanded) = GetLeftSidebarRowInfo(item.DataContext);
+            switch (key)
+            {
+                case Key.Up when index == 0:
+                    FocusLeftSidebarHeader(group, 1);
+                    return true;
+                case Key.Down when index == list.ItemCount - 1:
+                    FocusLeftSidebarHeader(group + 1, 1);
+                    return true;
+                case Key.Left:
+                    if (isFolder && isExpanded)
+                    {
+                        ToggleLeftSidebarRow(content, item.DataContext);
+                    }
+                    else if (depth > 0)
+                    {
+                        for (var i = index - 1; i >= 0; i--)
+                        {
+                            if (GetLeftSidebarRowInfo(list.Items[i]).Depth < depth)
+                            {
+                                FocusLeftSidebarRow(list, i);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        FocusLeftSidebarHeader(group, 1);
+                    }
+                    return true;
+                case Key.Right when isFolder:
+                    if (!isExpanded)
+                        ToggleLeftSidebarRow(content, item.DataContext);
+                    else if (index + 1 < list.ItemCount)
+                        FocusLeftSidebarRow(list, index + 1);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private ListBox GetLeftSidebarGroupList(int group)
+        {
+            var content = _leftSidebarGroups[group].Content;
+            if (!content.IsVisible)
+                return null;
+
+            return content as ListBox ?? content.FindDescendantOfType<ListBox>();
+        }
+
+        private bool FocusLeftSidebarHeader(int group, int step)
+        {
+            // Skip hidden groups in the direction of travel. Nothing to move to: stay where we are.
+            while (group >= 0 && group < _leftSidebarGroups.Length && !_leftSidebarGroups[group].Header.IsVisible)
+                group += step;
+
+            if (group < 0 || group >= _leftSidebarGroups.Length)
+                return false;
+
+            // The header becomes the only selected item in the sidebar.
+            for (var i = 0; i < _leftSidebarGroups.Length; i++)
+                GetLeftSidebarGroupList(i)?.UnselectAll();
+
+            var header = _leftSidebarGroups[group].Header;
+            header.Focus(NavigationMethod.Directional);
+            header.BringIntoView();
+            return true;
+        }
+
+        private static void FocusLeftSidebarRow(ListBox list, int index)
+        {
+            list.SelectedIndex = index;
+            list.ScrollIntoView(index);
+            list.ContainerFromIndex(index)?.Focus(NavigationMethod.Directional);
+        }
+
+        private static (int Depth, bool IsFolder, bool IsExpanded) GetLeftSidebarRowInfo(object row)
+        {
+            return row switch
+            {
+                ViewModels.BranchTreeNode node => (node.Depth, !node.IsBranch, node.IsExpanded),
+                ViewModels.TagTreeNode node => (node.Depth, node.IsFolder, node.IsExpanded),
+                ViewModels.SubmoduleTreeNode node => (node.Depth, node.IsFolder, node.IsExpanded),
+                _ => (0, false, false),
+            };
+        }
+
+        private static void ToggleLeftSidebarRow(Control content, object row)
+        {
+            switch (row)
+            {
+                case ViewModels.BranchTreeNode node when content is BranchTree tree:
+                    tree.ToggleNodeIsExpanded(node);
+                    break;
+                case ViewModels.TagTreeNode node when content is TagsView tags:
+                    tags.ToggleNodeIsExpanded(node);
+                    break;
+                case ViewModels.SubmoduleTreeNode node when content is SubmodulesView submodules:
+                    submodules.ToggleNodeIsExpanded(node);
+                    break;
+            }
         }
 
         private void OnLeftSidebarFilterTextChanged(object _1, TextChangedEventArgs _2)
