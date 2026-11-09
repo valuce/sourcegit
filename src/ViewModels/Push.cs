@@ -109,10 +109,23 @@ namespace SourceGit.ViewModels
             set;
         }
 
-        public Push(Repository repo, Models.Branch localBranch)
+        public bool IsCreatePullRequestVisible
+        {
+            get;
+        }
+
+        public bool CreatePullRequest
+        {
+            get;
+            set;
+        }
+
+        public Push(Repository repo, Models.Branch localBranch, bool createPullRequest = false)
         {
             _repo = repo;
             CanTerminate = true;
+            IsCreatePullRequestVisible = createPullRequest;
+            CreatePullRequest = createPullRequest;
 
             // Gather all local branches and find current branch.
             LocalBranches = new List<Models.Branch>();
@@ -192,6 +205,10 @@ namespace SourceGit.ViewModels
             log.Complete();
 
             _cancellation = null;
+
+            if (succ && CreatePullRequest)
+                OpenCreatePullRequestPage();
+
             return succ;
         }
 
@@ -344,6 +361,19 @@ namespace SourceGit.ViewModels
             branches.Add(fake);
             RemoteBranches = branches;
             SelectedRemoteBranch = fake;
+        }
+
+        private void OpenCreatePullRequestPage()
+        {
+            // The remote branch may come from `branch.<name>.merge`, which is a full ref.
+            var remoteBranch = _selectedRemoteBranch.Name;
+            if (remoteBranch.StartsWith("refs/heads/", StringComparison.Ordinal))
+                remoteBranch = remoteBranch.Substring(11);
+
+            if (!string.IsNullOrEmpty(_selectedRemote.URL) && _selectedRemote.TryGetCreatePullRequestURL(out var url, remoteBranch))
+                Native.OS.OpenBrowser(url);
+            else
+                _repo.SendNotification($"Can NOT open a page to create PR for remote '{_selectedRemote.Name}'", true);
         }
 
         private bool IsPreferredPushRemote(Models.Remote remote)

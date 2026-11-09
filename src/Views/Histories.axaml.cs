@@ -1680,6 +1680,9 @@ namespace SourceGit.Views
             };
             submenu.Items.Add(push);
 
+            if (this.CreatePullRequestMenuItem(repo, current) is { } createPR)
+                submenu.Items.Add(createPR);
+
             var rename = new MenuItem();
             rename.Header = App.Text("BranchCM.Rename", current.Name);
             rename.Icon = this.CreateMenuIcon("Icons.Rename");
@@ -1814,6 +1817,9 @@ namespace SourceGit.Views
             };
             submenu.Items.Add(push);
 
+            if (this.CreatePullRequestMenuItem(repo, branch) is { } createPR)
+                submenu.Items.Add(createPR);
+
             var rename = new MenuItem();
             rename.Header = App.Text("BranchCM.Rename", branch.Name);
             rename.Icon = this.CreateMenuIcon("Icons.Rename");
@@ -1919,6 +1925,9 @@ namespace SourceGit.Views
                 e.Handled = true;
             };
             submenu.Items.Add(checkoutAsWorktree);
+
+            if (this.CreatePullRequestMenuItem(repo, branch) is { } createPR)
+                submenu.Items.Add(createPR);
 
             var merge = new MenuItem();
             merge.Header = App.Text("BranchCM.Merge", name, current.Name);

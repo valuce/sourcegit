@@ -19,7 +19,7 @@
                  Text="{DynamicResource Text.Push.Title}"/>
     </StackPanel>
 
-    <Grid Margin="0,16,0,0" RowDefinitions="32,32,32,Auto,Auto,Auto,32,32" ColumnDefinitions="130,*">
+    <Grid Margin="0,16,0,0" RowDefinitions="32,32,32,Auto,Auto,Auto,32,32,Auto" ColumnDefinitions="130,*">
       <TextBlock Grid.Row="0" Grid.Column="0"
                  HorizontalAlignment="Right" VerticalAlignment="Center"
                  Margin="0,0,8,0"
@@ -100,6 +100,12 @@
                 Content="{DynamicResource Text.Push.Force}"
                 IsChecked="{Binding ForcePush, Mode=TwoWay}"
                 ToolTip.Tip="--force-with-lease"/>
+
+      <CheckBox Grid.Row="8" Grid.Column="1"
+                Height="32"
+                Content="{DynamicResource Text.Push.CreatePR}"
+                IsChecked="{Binding CreatePullRequest, Mode=TwoWay}"
+                IsVisible="{Binding IsCreatePullRequestVisible}"/>
     </Grid>
   </StackPanel>
 </UserControl>
