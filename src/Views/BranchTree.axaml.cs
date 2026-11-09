@@ -1028,23 +1028,9 @@ namespace SourceGit.Views
             menu.Items.Add(createBranch);
             menu.Items.Add(createTag);
 
-            if (upstream != null)
-            {
-                var remote = repo.Remotes.Find(x => x.Name.Equals(upstream.Remote, StringComparison.Ordinal));
-                if (remote != null && remote.TryGetCreatePullRequestURL(out var prURL, upstream.Name))
-                {
-                    var createPR = new MenuItem();
-                    createPR.Header = App.Text("BranchCM.CreatePRForUpstream", upstream.FriendlyName);
-                    createPR.Icon = this.CreateMenuIcon("Icons.CreatePR");
-                    createPR.Click += (_, e) =>
-                    {
-                        Native.OS.OpenBrowser(prURL);
-                        e.Handled = true;
-                    };
+            if (this.CreatePullRequestMenuItem(repo, branch) is { } createPR)
+                menu.Items.Add(createPR);
 
-                    menu.Items.Add(createPR);
-                }
-            }
             menu.Items.Add(new MenuItem() { Header = "-" });
             TryToAddCustomActionsToBranchContextMenu(repo, menu, branch);
 
@@ -1353,20 +1339,8 @@ namespace SourceGit.Views
             menu.Items.Add(createBranch);
             menu.Items.Add(createTag);
 
-            var remote = repo.Remotes.Find(x => x.Name.Equals(branch.Remote, StringComparison.Ordinal));
-            if (remote != null && remote.TryGetCreatePullRequestURL(out var prURL, branch.Name))
-            {
-                var createPR = new MenuItem();
-                createPR.Header = App.Text("BranchCM.CreatePR");
-                createPR.Icon = this.CreateMenuIcon("Icons.CreatePR");
-                createPR.Click += (_, e) =>
-                {
-                    Native.OS.OpenBrowser(prURL);
-                    e.Handled = true;
-                };
-
+            if (this.CreatePullRequestMenuItem(repo, branch) is { } createPR)
                 menu.Items.Add(createPR);
-            }
 
             menu.Items.Add(new MenuItem() { Header = "-" });
 

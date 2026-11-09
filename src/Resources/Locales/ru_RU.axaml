@@ -83,6 +83,7 @@
   <x:String x:Key="Text.BranchCM.Pull" xml:space="preserve">Загрузить ${0}$</x:String>
   <x:String x:Key="Text.BranchCM.PullInto" xml:space="preserve">Загрузить ${0}$ в ${1}$...</x:String>
   <x:String x:Key="Text.BranchCM.Push" xml:space="preserve">Выложить ${0}$</x:String>
+  <x:String x:Key="Text.BranchCM.PushAndCreatePR" xml:space="preserve">Выложить и создать PR...</x:String>
   <x:String x:Key="Text.BranchCM.Rebase" xml:space="preserve">Переместить ${0}$ на ${1}$...</x:String>
   <x:String x:Key="Text.BranchCM.Rename" xml:space="preserve">Переименовать ${0}$...</x:String>
   <x:String x:Key="Text.BranchCM.ResetToSelectedCommit" xml:space="preserve">Сбросить ${0}$ к ${1}$...</x:String>
@@ -760,6 +761,7 @@
   <x:String x:Key="Text.Pull.UseRebase" xml:space="preserve">Использовать перемещение вместо слияния</x:String>
   <x:String x:Key="Text.Push" xml:space="preserve">Выложить</x:String>
   <x:String x:Key="Text.Push.CheckSubmodules" xml:space="preserve">Убедитесь, что подмодули были вставлены</x:String>
+  <x:String x:Key="Text.Push.CreatePR" xml:space="preserve">Открыть страницу создания PR после выкладывания</x:String>
   <x:String x:Key="Text.Push.Force" xml:space="preserve">Принудительно выложить</x:String>
   <x:String x:Key="Text.Push.Local" xml:space="preserve">Локальная ветка:</x:String>
   <x:String x:Key="Text.Push.New" xml:space="preserve">НОВЫЙ</x:String>
