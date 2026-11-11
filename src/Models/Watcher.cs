@@ -367,7 +367,10 @@ namespace SourceGit.Models
             if (string.IsNullOrEmpty(folder) || folder.Equals(_root, StringComparison.Ordinal))
                 return false;
 
-            if (File.Exists($"{folder}/.git"))
+            // A submodule usually has a `.git` file that points into `.git/modules` of its parent, but one added from an
+            // existing clone keeps its own `.git` folder.
+            var dotGit = $"{folder}/.git";
+            if (File.Exists(dotGit) || Directory.Exists(dotGit))
                 return true;
 
             return IsInSubmodule(Path.GetDirectoryName(folder));

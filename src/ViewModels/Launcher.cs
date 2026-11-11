@@ -30,7 +30,12 @@ namespace SourceGit.ViewModels
             set
             {
                 if (SetProperty(ref _activePage, value))
+                {
                     PostActivePageChanged();
+
+                    if (value is { Data: Repository repo })
+                        repo.RecheckSubmodules();
+                }
             }
         }
 

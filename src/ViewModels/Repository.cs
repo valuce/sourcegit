@@ -1265,8 +1265,22 @@ namespace SourceGit.ViewModels
             }, token);
         }
 
+        public void RecheckSubmodules()
+        {
+            // Called when the tab of this repository is brought back. Changes made inside a submodule (in its own tab, for
+            // example) are not always caught by the file watcher of this repository. Skip it when the submodules have just
+            // been queried, e.g. right after the repository was opened.
+            var elapsed = DateTime.Now.Ticks - Interlocked.Read(ref _lastSubmodulesRefreshTicks);
+            if (elapsed < TimeSpan.TicksPerSecond * 2)
+                return;
+
+            RefreshSubmodules();
+        }
+
         public void RefreshSubmodules()
         {
+            Interlocked.Exchange(ref _lastSubmodulesRefreshTicks, DateTime.Now.Ticks);
+
             if (!MayHaveSubmodules())
             {
                 if (_submodules.Count > 0)
@@ -1990,6 +2004,7 @@ namespace SourceGit.ViewModels
         private Models.FilterMode _historyFilterMode = Models.FilterMode.None;
         private bool _hasAllowedSignersFile = false;
         private ulong _queryLocalChangesTimes = 0;
+        private long _lastSubmodulesRefreshTicks = 0;
 
         private Models.Watcher _watcher = null;
         private Histories _histories = null;
