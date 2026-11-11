@@ -22,6 +22,7 @@ namespace SourceGit.Models
         public List<string> Behind { get; set; } = [];
         public string Remote { get; set; }
         public bool IsUpstreamGone { get; set; }
+        public bool IsLocalOnly { get; set; }
         public string WorktreePath { get; set; }
 
         public bool HasWorktree => !IsCurrent && !string.IsNullOrEmpty(WorktreePath);

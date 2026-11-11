@@ -1145,6 +1145,7 @@ namespace SourceGit.ViewModels
             {
                 var branches = await new Commands.QueryBranches(FullPath).GetResultAsync().ConfigureAwait(false);
                 var remotes = await new Commands.QueryRemotes(FullPath).GetResultAsync().ConfigureAwait(false);
+                MarkLocalOnlyBranches(branches, remotes.Count > 0);
                 var builder = BuildBranchTree(branches, remotes);
 
                 Dispatcher.UIThread.Invoke(() =>
@@ -1679,6 +1680,31 @@ namespace SourceGit.ViewModels
             }
 
             return null;
+        }
+
+        private static void MarkLocalOnlyBranches(List<Models.Branch> branches, bool hasRemotes)
+        {
+            // Without any remote every branch is local, so there is nothing to tell apart.
+            if (!hasRemotes)
+                return;
+
+            var remoteNames = new HashSet<string>();
+            foreach (var b in branches)
+            {
+                if (!b.IsLocal)
+                    remoteNames.Add(b.Name);
+            }
+
+            // A local branch exists only here when it does not track a live upstream and no remote has a branch with the
+            // same name (it may have been pushed without setting the upstream).
+            foreach (var b in branches)
+            {
+                if (!b.IsLocal || b.IsDetachedHead)
+                    continue;
+
+                var hasUpstream = !string.IsNullOrEmpty(b.Upstream) && !b.IsUpstreamGone;
+                b.IsLocalOnly = !hasUpstream && !remoteNames.Contains(b.Name);
+            }
         }
 
         private BranchTreeNode.Builder BuildBranchTree(List<Models.Branch> branches, List<Models.Remote> remotes, bool validateExpandedNodes = true)

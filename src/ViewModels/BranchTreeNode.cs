@@ -49,6 +49,11 @@ namespace SourceGit.ViewModels
             get => Backend is Models.Branch { IsUpstreamGone: true };
         }
 
+        public bool IsLocalOnly
+        {
+            get => Backend is Models.Branch { IsLocalOnly: true };
+        }
+
         public string BranchesCount
         {
             get => Counter > 0 ? $"({Counter})" : string.Empty;

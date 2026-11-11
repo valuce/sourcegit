@@ -28,6 +28,10 @@
         <Setter Property="CornerRadius" Value="{Binding CornerRadius}"/>
       </Style>
 
+      <Style Selector="TextBlock.local_only">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.LocalOnlyBranch}"/>
+      </Style>
+
       <Style Selector="ListBoxItem:pointerover v|FilterModeSwitchButton">
         <Setter Property="IsHoverParent" Value="True"/>
       </Style>
@@ -156,6 +160,7 @@
 
               <!-- Name -->
               <TextBlock Grid.Column="1"
+                         Classes.local_only="{Binding IsLocalOnly}"
                          FontWeight="{Binding IsCurrent, Converter={x:Static c:BoolConverters.IsBoldToFontWeight}}"
                          TextTrimming="CharacterEllipsis">
                 <Run Text="{Binding Name}"/>
