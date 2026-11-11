@@ -40,7 +40,11 @@ namespace SourceGit.Views
             set
             {
                 if (SetAndRaise(IsNormalSidebarVisibleProperty, ref _isNormalSidebarVisible, value))
+                {
                     CalculateSidebarWidth();
+                    if (value)
+                        UpdateLeftSidebarLayout();
+                }
             }
         }
 
