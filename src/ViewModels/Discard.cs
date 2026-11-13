@@ -84,7 +84,7 @@ namespace SourceGit.ViewModels
                 if (_repo.Submodules.Count > 0)
                 {
                     await Commands.Discard.AllSubmodulesAsync(_repo.FullPath, all.IncludeModified, all.IncludeUntracked, all.IncludeIgnored, log);
-                    _repo.RefreshSubmodules();
+                    await _repo.RefreshSubmodulesAsync();
                 }
 
                 _repo.ClearCommitMessage();
@@ -108,8 +108,10 @@ namespace SourceGit.ViewModels
                 foreach (var submodule in submodules)
                     await Commands.Discard.SubmoduleAsync(_repo.FullPath, submodule, log);
 
+                // Wait for the new submodule states. The working copy (refreshed below) lists the submodules that have
+                // local changes, so it would bring the discarded ones back with the outdated states.
                 if (submodules.Count > 0)
-                    _repo.RefreshSubmodules();
+                    await _repo.RefreshSubmodulesAsync();
             }
 
             log.Complete();
