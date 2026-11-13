@@ -1327,6 +1327,11 @@ namespace SourceGit.ViewModels
 
         public void RefreshSubmodules()
         {
+            _ = RefreshSubmodulesAsync();
+        }
+
+        public Task RefreshSubmodulesAsync()
+        {
             Interlocked.Exchange(ref _lastSubmodulesRefreshTicks, DateTime.Now.Ticks);
 
             if (!MayHaveSubmodules())
@@ -1341,10 +1346,10 @@ namespace SourceGit.ViewModels
                     });
                 }
 
-                return;
+                return Task.CompletedTask;
             }
 
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 var submodules = await new Commands.QuerySubmodules(FullPath).GetResultAsync().ConfigureAwait(false);
 
