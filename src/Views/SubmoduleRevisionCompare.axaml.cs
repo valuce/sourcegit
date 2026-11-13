@@ -12,6 +12,7 @@ namespace SourceGit.Views
     {
         public SubmoduleRevisionCompare()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
 

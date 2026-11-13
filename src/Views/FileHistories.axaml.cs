@@ -13,6 +13,7 @@ namespace SourceGit.Views
     {
         public FileHistories()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
 

@@ -4,6 +4,7 @@ namespace SourceGit.Views
     {
         public CommitDetailStandalone()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
     }

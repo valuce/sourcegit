@@ -4,6 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+
+using AvaloniaEdit;
 
 namespace SourceGit.Views
 {
@@ -28,6 +31,7 @@ namespace SourceGit.Views
             Native.OS.SetupForWindow(this);
             PositionChanged += (_, _) => UpdateEdgeSnapInsets();
             Resized += (_, _) => UpdateEdgeSnapInsets();
+            AddHandler(KeyDownEvent, OnPreviewEscapeInTextEditor, RoutingStrategies.Tunnel);
         }
 
         public void BeginMoveWindow(object _, PointerPressedEventArgs e)
@@ -130,6 +134,21 @@ namespace SourceGit.Views
                     e.Handled = true;
                 }
             }
+        }
+
+        private void OnPreviewEscapeInTextEditor(object sender, KeyEventArgs e)
+        {
+            if (!CloseOnESC || e is not { Key: Key.Escape, KeyModifiers: KeyModifiers.None } || e.Source is not Visual source)
+                return;
+
+            // A text editor (diff, blame, ...) marks ESC as handled even when its search panel is closed, so the window
+            // would never get it. Close the window first unless ESC is going to close that search panel.
+            var editor = source as TextEditor ?? source.FindAncestorOfType<TextEditor>();
+            if (editor is { SearchPanel: { IsOpened: true } } or null)
+                return;
+
+            Close();
+            e.Handled = true;
         }
 
         private void OnWindowBorderPointerPressed(object sender, PointerPressedEventArgs e)
