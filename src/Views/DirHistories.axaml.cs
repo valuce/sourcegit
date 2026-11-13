@@ -8,6 +8,7 @@ namespace SourceGit.Views
     {
         public DirHistories()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
 

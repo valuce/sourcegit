@@ -13,6 +13,7 @@ namespace SourceGit.Views
     {
         public Compare()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
 

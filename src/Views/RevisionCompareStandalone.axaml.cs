@@ -4,6 +4,7 @@ namespace SourceGit.Views
     {
         public RevisionCompareStandalone()
         {
+            CloseOnESC = true;
             InitializeComponent();
         }
     }
