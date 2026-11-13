@@ -1108,6 +1108,7 @@
   <x:String x:Key="Text.WorkingCopy.Staged" xml:space="preserve">СФОРМИРОВАННЫЕ</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">РАСФОРМИРОВАТЬ</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">РАСФОРМИРОВАТЬ ВСЁ</x:String>
+  <x:String x:Key="Text.WorkingCopy.SubmoduleHasOnlyLocalChanges" xml:space="preserve">Нечего сформировать в подмодуле {0}: сначала зафиксируйте изменения внутри него.</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">НЕСФОРМИРОВАННЫЕ</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">СФОРМИРОВАТЬ</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">СФОРМИРОВАТЬ ВСЁ</x:String>

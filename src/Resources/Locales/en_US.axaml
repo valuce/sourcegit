@@ -1104,6 +1104,7 @@ Manually add a branch/tag history filter will disable this feature automatically
   <x:String x:Key="Text.WorkingCopy.Staged" xml:space="preserve">STAGED</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">UNSTAGE ALL</x:String>
+  <x:String x:Key="Text.WorkingCopy.SubmoduleHasOnlyLocalChanges" xml:space="preserve">Nothing to stage in submodule {0}: commit the changes inside it first.</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">UNSTAGED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">STAGE ALL</x:String>

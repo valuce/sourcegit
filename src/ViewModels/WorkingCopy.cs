@@ -368,10 +368,18 @@ namespace SourceGit.ViewModels
 
         public async Task StageChangesAsync(List<Models.Change> changes, Models.Change next)
         {
-            var canStaged = await GetCanStageChangesAsync(changes);
+            // Submodules that only have changes inside are listed too, but there is nothing to stage for them (git stages
+            // the commit of a submodule, not its working tree) until those changes are committed in the submodule.
+            var canStaged = (await GetCanStageChangesAsync(changes)).FindAll(x => !IsSubmoduleWithOnlyLocalChanges(x));
             var count = canStaged.Count;
             if (count == 0)
+            {
+                var submodules = changes.FindAll(IsSubmoduleWithOnlyLocalChanges);
+                if (submodules.Count > 0 && submodules.Count == changes.Count)
+                    _repo.SendNotification(App.Text("WorkingCopy.SubmoduleHasOnlyLocalChanges", string.Join(", ", submodules.ConvertAll(x => x.Path))));
+
                 return;
+            }
 
             IsStaging = true;
             _selectedUnstaged = new(next != null ? new List<Models.Change> { next } : null);
@@ -763,6 +771,13 @@ namespace SourceGit.ViewModels
             }
 
             return outs;
+        }
+
+        private bool IsSubmoduleWithOnlyLocalChanges(Models.Change change)
+        {
+            // The commit of such a submodule matches the recorded one, see Repository.RefreshWorkingCopyChanges.
+            return change.WorkTree == Models.ChangeState.Modified &&
+                   _repo.Submodules.Find(x => x.Path.Equals(change.Path, StringComparison.Ordinal)) is { Status: Models.SubmoduleStatus.Modified };
         }
 
         private List<Models.Change> GetStagedChanges(List<Models.Change> cached)
