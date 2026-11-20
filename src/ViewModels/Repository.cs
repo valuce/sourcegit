@@ -1349,46 +1349,93 @@ namespace SourceGit.ViewModels
                 return Task.CompletedTask;
             }
 
+            // Querying the submodules is slow (git visits each of them) and cannot be interrupted. While files keep
+            // changing (e.g. Unity importing assets) the watcher asks for it much faster than a query completes, so never
+            // run more than one at a time: requests made in the meantime share a single query that starts right after
+            // the running one, which is enough to see every change made before it starts.
+            lock (_submodulesRefreshLock)
+            {
+                if (_isRefreshingSubmodules)
+                {
+                    _queuedSubmodulesRefresh ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                    return _queuedSubmodulesRefresh.Task;
+                }
+
+                _isRefreshingSubmodules = true;
+            }
+
             return Task.Run(async () =>
             {
-                var submodules = await new Commands.QuerySubmodules(FullPath).GetResultAsync().ConfigureAwait(false);
-
-                Dispatcher.UIThread.Invoke(() =>
+                TaskCompletionSource queued = null;
+                while (true)
                 {
-                    bool hasChanged = _submodules.Count != submodules.Count;
-                    if (!hasChanged)
+                    try
                     {
-                        var old = new Dictionary<string, Models.Submodule>();
-                        foreach (var module in _submodules)
-                            old.Add(module.Path, module);
+                        await QueryAndApplySubmodulesAsync().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // Ignore exceptions, so that the requests waiting for this query are never left pending.
+                    }
 
-                        foreach (var module in submodules)
+                    queued?.TrySetResult();
+
+                    lock (_submodulesRefreshLock)
+                    {
+                        queued = _queuedSubmodulesRefresh;
+                        _queuedSubmodulesRefresh = null;
+
+                        if (queued == null)
                         {
-                            if (!old.TryGetValue(module.Path, out var exist))
-                            {
-                                hasChanged = true;
-                                break;
-                            }
-
-                            hasChanged = !exist.SHA.Equals(module.SHA, StringComparison.Ordinal) ||
-                                         !exist.Branch.Equals(module.Branch, StringComparison.Ordinal) ||
-                                         !exist.URL.Equals(module.URL, StringComparison.Ordinal) ||
-                                         exist.Status != module.Status;
-
-                            if (hasChanged)
-                                break;
+                            _isRefreshingSubmodules = false;
+                            return;
                         }
                     }
 
-                    if (hasChanged)
-                    {
-                        Submodules = submodules;
-                        VisibleSubmodules = BuildVisibleSubmodules();
+                    Interlocked.Exchange(ref _lastSubmodulesRefreshTicks, DateTime.Now.Ticks);
+                }
+            });
+        }
 
-                        // Submodules with local changes are listed in the working copy.
-                        RefreshWorkingCopyChanges();
+        private async Task QueryAndApplySubmodulesAsync()
+        {
+            var submodules = await new Commands.QuerySubmodules(FullPath).GetResultAsync().ConfigureAwait(false);
+
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                bool hasChanged = _submodules.Count != submodules.Count;
+                if (!hasChanged)
+                {
+                    var old = new Dictionary<string, Models.Submodule>();
+                    foreach (var module in _submodules)
+                        old.Add(module.Path, module);
+
+                    foreach (var module in submodules)
+                    {
+                        if (!old.TryGetValue(module.Path, out var exist))
+                        {
+                            hasChanged = true;
+                            break;
+                        }
+
+                        hasChanged = !exist.SHA.Equals(module.SHA, StringComparison.Ordinal) ||
+                                     !exist.Branch.Equals(module.Branch, StringComparison.Ordinal) ||
+                                     !exist.URL.Equals(module.URL, StringComparison.Ordinal) ||
+                                     exist.Status != module.Status;
+
+                        if (hasChanged)
+                            break;
                     }
-                });
+                }
+
+                if (hasChanged)
+                {
+                    Submodules = submodules;
+                    VisibleSubmodules = BuildVisibleSubmodules();
+
+                    // Submodules with local changes are listed in the working copy.
+                    RefreshWorkingCopyChanges();
+                }
             });
         }
 
@@ -2058,6 +2105,9 @@ namespace SourceGit.ViewModels
         private bool _hasAllowedSignersFile = false;
         private ulong _queryLocalChangesTimes = 0;
         private long _lastSubmodulesRefreshTicks = 0;
+        private readonly object _submodulesRefreshLock = new object();
+        private bool _isRefreshingSubmodules = false;
+        private TaskCompletionSource _queuedSubmodulesRefresh = null;
 
         private Models.Watcher _watcher = null;
         private Histories _histories = null;
