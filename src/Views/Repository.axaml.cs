@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Avalonia;
 using Avalonia.Controls;
@@ -105,6 +106,39 @@ namespace SourceGit.Views
         {
             base.OnLoaded(e);
             UpdateLeftSidebarLayout();
+        }
+
+        private void OnDragOverPatchFile(object _, DragEventArgs e)
+        {
+            e.DragEffects = GetDroppedPatchFile(e) != null ? DragDropEffects.Copy : DragDropEffects.None;
+            e.Handled = true;
+        }
+
+        private void OnDropPatchFile(object _, DragEventArgs e)
+        {
+            var file = GetDroppedPatchFile(e);
+            if (file == null)
+                return;
+
+            e.Handled = true;
+            if (DataContext is ViewModels.Repository repo)
+                repo.ApplyPatchFile(file);
+        }
+
+        private string GetDroppedPatchFile(DragEventArgs e)
+        {
+            if (DataContext is not ViewModels.Repository { IsBare: false } repo || !repo.CanCreatePopup())
+                return null;
+
+            if (!e.DataTransfer.Contains(DataFormat.File))
+                return null;
+
+            var files = e.DataTransfer.TryGetFiles();
+            if (files is not { Length: 1 })
+                return null;
+
+            var file = files[0].Path.LocalPath;
+            return ViewModels.Apply.IsPatchFile(file) && File.Exists(file) ? file : null;
         }
 
         private async void OnOpenConfigure(object sender, RoutedEventArgs e)

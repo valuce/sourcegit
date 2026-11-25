@@ -58,7 +58,7 @@ namespace SourceGit.Views
             }
 
             var file = files[0].Path.LocalPath;
-            if (!file.EndsWith(".patch") && !file.EndsWith(".diff"))
+            if (!ViewModels.Apply.IsPatchFile(file))
             {
                 e.DragEffects = DragDropEffects.None;
                 e.Handled = true;
@@ -80,7 +80,7 @@ namespace SourceGit.Views
                 return;
 
             var file = files[0].Path.LocalPath;
-            if (!file.EndsWith(".patch") && !file.EndsWith(".diff"))
+            if (!ViewModels.Apply.IsPatchFile(file))
                 return;
 
             TxtPatchFile.Text = file;

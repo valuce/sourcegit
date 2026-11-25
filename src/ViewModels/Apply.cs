@@ -68,6 +68,17 @@ namespace SourceGit.ViewModels
             SelectedWhiteSpaceMode = idx >= 0 && idx < modes.Length ? modes[idx] : modes[0];
         }
 
+        public Apply(Repository repo, string patchFile) : this(repo)
+        {
+            PatchFile = patchFile;
+        }
+
+        public static bool IsPatchFile(string file)
+        {
+            return file.EndsWith(".patch", StringComparison.OrdinalIgnoreCase) ||
+                file.EndsWith(".diff", StringComparison.OrdinalIgnoreCase);
+        }
+
         public static ValidationResult ValidatePatchFile(string file, ValidationContext ctx)
         {
             if (ctx.ObjectInstance is not Apply apply)

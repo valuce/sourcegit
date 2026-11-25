@@ -741,6 +741,12 @@ namespace SourceGit.ViewModels
                 ShowPopup(new Apply(this));
         }
 
+        public void ApplyPatchFile(string patchFile)
+        {
+            if (!IsBare && CanCreatePopup())
+                ShowPopup(new Apply(this, patchFile));
+        }
+
         public async Task ExecCustomActionAsync(Models.CustomAction action, object scopeTarget)
         {
             if (!CanCreatePopup())

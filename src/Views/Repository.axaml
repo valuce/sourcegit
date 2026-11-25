@@ -9,7 +9,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SourceGit.Views.Repository"
              x:DataType="vm:Repository"
-             x:Name="ThisControl">  
+             x:Name="ThisControl"
+             DragDrop.AllowDrop="True"
+             DragDrop.DragOver="OnDragOverPatchFile"
+             DragDrop.Drop="OnDropPatchFile">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="Auto"/>
