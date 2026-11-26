@@ -19,7 +19,10 @@ namespace SourceGit.ViewModels
             set
             {
                 if (SetProperty(ref _remote, value, true))
+                {
                     UseSSH = Models.Remote.IsSSH(value);
+                    ConnectionTest.Reset();
+                }
             }
         }
 
@@ -32,7 +35,16 @@ namespace SourceGit.ViewModels
         public string SSHKey
         {
             get => _sshKey;
-            set => SetProperty(ref _sshKey, value);
+            set
+            {
+                if (SetProperty(ref _sshKey, value))
+                    ConnectionTest.Reset();
+            }
+        }
+
+        public RemoteConnectionTest ConnectionTest
+        {
+            get;
         }
 
         [Required(ErrorMessage = "Parent folder is required")]
@@ -88,6 +100,9 @@ namespace SourceGit.ViewModels
         {
             _pageId = pageId;
             CanTerminate = true;
+
+            // There is no repository yet, so the check runs outside of any.
+            ConnectionTest = new RemoteConnectionTest(() => (null, _remote, _useSSH ? _sshKey : null));
 
             Groups = new List<TargetGroup>();
             Groups.Add(new TargetGroup(string.Empty, "Auto", "Based-on Default Clone Dir"));
@@ -214,6 +229,12 @@ namespace SourceGit.ViewModels
 
             _cancellation = null;
             return true;
+        }
+
+        public override void Cleanup()
+        {
+            ConnectionTest.Reset();
+            base.Cleanup();
         }
 
         public override void Terminate()

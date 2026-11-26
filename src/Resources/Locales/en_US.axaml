@@ -858,6 +858,11 @@
   <x:String x:Key="Text.Remote.Name" xml:space="preserve">Name:</x:String>
   <x:String x:Key="Text.Remote.Name.Placeholder" xml:space="preserve">Remote name</x:String>
   <x:String x:Key="Text.Remote.ResetPushURL" xml:space="preserve">Reset push URL to this repository URL</x:String>
+  <x:String x:Key="Text.Remote.TestConnection" xml:space="preserve">Test Connection</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.BadURL" xml:space="preserve">Bad remote URL format</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Failed" xml:space="preserve">Can not connect to the remote repository</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Succeeded" xml:space="preserve">Connected successfully</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Testing" xml:space="preserve">Connecting...</x:String>
   <x:String x:Key="Text.Remote.URL" xml:space="preserve">Repository URL:</x:String>
   <x:String x:Key="Text.Remote.URL.Placeholder" xml:space="preserve">Remote git repository URL</x:String>
   <x:String x:Key="Text.RemoteCM.CopyURL" xml:space="preserve">Copy URL</x:String>

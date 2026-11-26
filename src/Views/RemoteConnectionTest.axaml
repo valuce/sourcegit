@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:v="using:SourceGit.Views"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="32"
+             x:Class="SourceGit.Views.RemoteConnectionTest"
+             x:DataType="vm:RemoteConnectionTest">
+  <Grid ColumnDefinitions="Auto,*">
+    <Button Grid.Column="0"
+            Classes="flat"
+            Height="26"
+            Padding="8,0"
+            VerticalAlignment="Center"
+            Click="OnTest"
+            IsEnabled="{Binding State, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static vm:RemoteConnectionState.Testing}}"
+            ToolTip.Tip="git ls-remote">
+      <StackPanel Orientation="Horizontal">
+        <Path Width="12" Height="12" Data="{StaticResource Icons.Link}"/>
+        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="{DynamicResource Text.Remote.TestConnection}"/>
+      </StackPanel>
+    </Button>
+
+    <StackPanel Grid.Column="1"
+                Margin="12,0,0,0"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:RemoteConnectionState.Testing}}">
+      <v:LoadingIcon Width="14" Height="14"/>
+      <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="{DynamicResource Text.Remote.TestConnection.Testing}"/>
+    </StackPanel>
+
+    <StackPanel Grid.Column="1"
+                Margin="12,0,0,0"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:RemoteConnectionState.Succeeded}}">
+      <Path Width="14" Height="14" Data="{StaticResource Icons.CheckCircled}" Fill="Green"/>
+      <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="{DynamicResource Text.Remote.TestConnection.Succeeded}"/>
+    </StackPanel>
+
+    <Grid Grid.Column="1"
+          Margin="12,0,0,0"
+          ColumnDefinitions="Auto,*"
+          VerticalAlignment="Center"
+          Background="Transparent"
+          ToolTip.Tip="{Binding ErrorDetails}"
+          IsVisible="{Binding State, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:RemoteConnectionState.Failed}}">
+      <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Error}" Fill="OrangeRed"/>
+      <TextBlock Grid.Column="1"
+                 Margin="8,0,0,0"
+                 VerticalAlignment="Center"
+                 TextTrimming="CharacterEllipsis"
+                 Text="{Binding Error}"/>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -23,7 +23,10 @@ namespace SourceGit.ViewModels
             set
             {
                 if (SetProperty(ref _url, value, true))
+                {
                     UseSSH = Models.Remote.IsSSH(value);
+                    ConnectionTest.Reset();
+                }
             }
         }
 
@@ -41,7 +44,16 @@ namespace SourceGit.ViewModels
         public string SSHKey
         {
             get => _sshkey;
-            set => SetProperty(ref _sshkey, value, true);
+            set
+            {
+                if (SetProperty(ref _sshkey, value, true))
+                    ConnectionTest.Reset();
+            }
+        }
+
+        public RemoteConnectionTest ConnectionTest
+        {
+            get;
         }
 
         public bool IsResetPushURLVisible
@@ -64,6 +76,7 @@ namespace SourceGit.ViewModels
             _useSSH = Models.Remote.IsSSH(remote.URL);
             _sshkey = remote.PrivateSSHKey;
             ResetPushURL = true;
+            ConnectionTest = new RemoteConnectionTest(() => (_repo.FullPath, _url, _useSSH ? _sshkey : null));
         }
 
         public static ValidationResult ValidateRemoteName(string name, ValidationContext ctx)
@@ -106,6 +119,12 @@ namespace SourceGit.ViewModels
             }
 
             return ValidationResult.Success;
+        }
+
+        public override void Cleanup()
+        {
+            ConnectionTest.Reset();
+            base.Cleanup();
         }
 
         public override async Task<bool> Sure()
