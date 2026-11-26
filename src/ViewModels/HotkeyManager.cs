@@ -77,6 +77,7 @@ namespace SourceGit.ViewModels
             Add("Repo.StashDirectly", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Hotkeys.Repo.StashDirectly");
             Add("Repo.ApplyPatch", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Apply.Title");
             Add("Repo.DiscardAll", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Repository.DiscardAll");
+            Add("Repo.CleanWorkingCopy", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "CleanWorkingCopy");
             Add("Repo.NewBranch", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Hotkeys.Repo.CreateBranch", Key.B, cmd);
             Add("Repo.NewBranchFromSelected", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Hotkeys.Repo.CreateBranchFromSelected", Key.B, cmd | KeyModifiers.Shift);
             Add("Repo.NewTag", Models.HotkeyGroup.Repository, Models.HotkeyScope.Repository, "Hotkeys.Repo.CreateTag");
