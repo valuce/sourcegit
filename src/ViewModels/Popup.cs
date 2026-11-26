@@ -65,7 +65,7 @@ namespace SourceGit.ViewModels
             Progress = match.Success ? Math.Min(double.Parse(match.Groups[1].Value), 100) : -1;
         }
 
-        public void Cleanup()
+        public virtual void Cleanup()
         {
             _log?.Unsubscribe(this);
         }

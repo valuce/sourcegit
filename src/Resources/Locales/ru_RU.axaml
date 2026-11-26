@@ -862,6 +862,11 @@
   <x:String x:Key="Text.Remote.Name" xml:space="preserve">Имя:</x:String>
   <x:String x:Key="Text.Remote.Name.Placeholder" xml:space="preserve">Имя внешнего репозитория</x:String>
   <x:String x:Key="Text.Remote.ResetPushURL" xml:space="preserve">Установить адрес выгрузки равным адресу этого репозитория</x:String>
+  <x:String x:Key="Text.Remote.TestConnection" xml:space="preserve">Проверить соединение</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.BadURL" xml:space="preserve">Неверный формат адреса</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Failed" xml:space="preserve">Не удалось подключиться к внешнему репозиторию</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Succeeded" xml:space="preserve">Соединение установлено</x:String>
+  <x:String x:Key="Text.Remote.TestConnection.Testing" xml:space="preserve">Подключение...</x:String>
   <x:String x:Key="Text.Remote.URL" xml:space="preserve">Адрес:</x:String>
   <x:String x:Key="Text.Remote.URL.Placeholder" xml:space="preserve">Адрес внешнего репозитория git</x:String>
   <x:String x:Key="Text.RemoteCM.CopyURL" xml:space="preserve">Копировать адрес</x:String>
