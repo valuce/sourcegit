@@ -326,6 +326,9 @@ namespace SourceGit.Views
                 case "Repo.DiscardAll" when !repo.IsBare:
                     repo.WorkingCopy?.DiscardAllChanges();
                     return true;
+                case "Repo.CleanWorkingCopy" when !repo.IsBare:
+                    repo.WorkingCopy?.CleanWorkingCopy();
+                    return true;
                 case "Repo.NewBranch":
                     repo.CreateNewBranch();
                     return true;

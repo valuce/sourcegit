@@ -454,6 +454,12 @@ namespace SourceGit.ViewModels
                 _repo.ShowPopup(new Discard(_repo));
         }
 
+        public void CleanWorkingCopy()
+        {
+            if (_repo.CanCreatePopup())
+                _repo.ShowPopup(new CleanWorkingCopy(_repo));
+        }
+
         public void Discard(List<Models.Change> changes, Models.Change next)
         {
             if (_repo.CanCreatePopup())

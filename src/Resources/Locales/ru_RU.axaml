@@ -142,6 +142,12 @@
   <x:String x:Key="Text.CherryPick.CommitChanges" xml:space="preserve">Ревизия всех изменений.</x:String>
   <x:String x:Key="Text.CherryPick.Mainline" xml:space="preserve">Основной:</x:String>
   <x:String x:Key="Text.CherryPick.Mainline.Tips" xml:space="preserve">Обычно вы не можете выделить слияние, потому что не знаете, какую сторону слияния следует считать основной. Эта опция позволяет отобразить изменения относительно указанного родительского элемента.</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy" xml:space="preserve">Очистить рабочую копию</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy.Ignored" xml:space="preserve">Игнорируемые файлы и папки (.gitignore)</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy.NestedRepositories" xml:space="preserve">Вложенные git-репозитории</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy.Remove" xml:space="preserve">Удалить:</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy.Tip" xml:space="preserve">Файлы, которые git не отслеживает. Отслеживаемые не тронет.</x:String>
+  <x:String x:Key="Text.CleanWorkingCopy.Untracked" xml:space="preserve">Неотслеживаемые файлы и папки</x:String>
   <x:String x:Key="Text.ClearStashes" xml:space="preserve">Очистить отложенные</x:String>
   <x:String x:Key="Text.ClearStashes.Message" xml:space="preserve">Вы пытаетесь очистить все отложенные. Вы уверены, что хотите продолжить?</x:String>
   <x:String x:Key="Text.Clone" xml:space="preserve">Клонировать внешний репозиторий</x:String>

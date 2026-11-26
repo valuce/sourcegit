@@ -26,7 +26,7 @@
 
       <!-- Search Filter -->
       <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}">
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
           <ToggleButton Grid.Column="0"
                         Classes="sidebar_expander"
                         Width="32"
@@ -74,8 +74,16 @@
                   ToolTip.Tip="{DynamicResource Text.WorkingCopy.DiscardAll}">
             <Path Width="14" Height="14" Data="{StaticResource Icons.Undo}"/>
           </Button>
-          
-          <v:ChangeViewModeSwitcher Grid.Column="3"
+
+          <Button Grid.Column="3"
+                  Classes="icon_button"
+                  VerticalAlignment="Center"
+                  Command="{Binding CleanWorkingCopy}"
+                  ToolTip.Tip="{DynamicResource Text.CleanWorkingCopy}">
+            <Path Width="14" Height="14" Data="{StaticResource Icons.Clean}"/>
+          </Button>
+
+          <v:ChangeViewModeSwitcher Grid.Column="4"
                                     Width="26"
                                     VerticalAlignment="Center"
                                     ViewMode="{Binding Source={x:Static vm:Preferences.Instance}, Path=ChangeViewMode, Mode=TwoWay}"/>

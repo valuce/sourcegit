@@ -201,6 +201,30 @@ namespace SourceGit.Models
             set;
         } = 0;
 
+        public bool CleanUntrackedFiles
+        {
+            get;
+            set;
+        } = true;
+
+        public bool CleanIgnoredFiles
+        {
+            get;
+            set;
+        } = false;
+
+        public bool CleanNestedRepositories
+        {
+            get;
+            set;
+        } = false;
+
+        public bool CleanSubmodules
+        {
+            get;
+            set;
+        } = false;
+
         public bool IsLocalBranchesExpandedInSideBar
         {
             get;
